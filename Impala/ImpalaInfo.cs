@@ -18,7 +18,7 @@ namespace Impala
             get
             {
                 //Return a 24x24 pixel bitmap to represent this GHA library.
-                return null;
+                return Impala.Properties.Resources.impala_main;
             }
         }
         public override string Description

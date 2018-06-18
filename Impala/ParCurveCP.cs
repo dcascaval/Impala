@@ -12,10 +12,10 @@ namespace Impala
     public class ParCurveCP : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the MyComponent1 class.
+        /// Initializes a new instance of the Parallel Curve CP class.
         /// </summary>
         public ParCurveCP()
-          : base("Curve Closest Point (Parallel)", "parCurveCP",
+          : base("Curve Closest Point", "parCurveCP",
               "Closest Point on a curve to a sample, within a tolerance.",
               "Impala", "Physical")
         {
@@ -184,7 +184,7 @@ namespace Impala
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.parccp;
             }
         }
 
