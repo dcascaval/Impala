@@ -60,6 +60,8 @@ namespace Impala
                 return;
             }
 
+            //HelloWorld
+
             // Find structure with highest dimensionality. This preserves path structure.
             List<GH_Path> pList = new List<GH_Path>(); //Our base output path list
             int pdim = pointTree.get_Path(pointTree.LongestPathIndex()).Length;
