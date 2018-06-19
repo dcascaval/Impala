@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="ImpalaComponent.cs" />
     <Compile Include="ImpalaInfo.cs" />
+    <Compile Include="ParMeshFlow.cs" />
     <Compile Include="ParClosestCurveCP.cs" />
     <Compile Include="ParCurveCP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
