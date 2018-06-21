@@ -68,7 +68,10 @@ namespace Impala
             int maxLen = Math.Max(curveTree.PathCount, lenTree.PathCount);
             //benchmark performance
 
-            Parallel.For(0, maxLen, i =>
+            List<CurveDivider> DivisionSetup = new List<CurveDivider>();
+            List<GH_Path> NullDivisions = new List<GH_Path>();
+
+            for(int i = 0; i < maxLen; i++)
             {
                 int ctidx = Math.Min(i, curveTree.PathCount - 1);
                 int ltidx = Math.Min(i, lenTree.PathCount - 1);
@@ -89,71 +92,52 @@ namespace Impala
 
                 int len = Math.Max(curveBranch.Count, lenBranch.Count);
 
-                CurveDivider[] dividedCurves = new CurveDivider[len];
                 if (!(curveBranch.Count == 0 || lenBranch.Count == 0))
                 {
-                    Parallel.For(0, len, j => {
+                    for (int j = 0; j < len; j++)
+                    {
                         int cidx = Math.Min(j, curveBranch.Count - 1);
                         int lidx = Math.Min(j, lenBranch.Count - 1);
-  
+
                         if (ErrorCheck(curveBranch[cidx], lenBranch[lidx]))
                         {
-                            CurveDivider crvDiv = new CurveDivider(curveBranch[cidx].Value, lenBranch[lidx].Value);
-                            crvDiv.Divide();
-                            dividedCurves[j] = crvDiv;
+                            DivisionSetup.Add(new CurveDivider(curveBranch[cidx].Value, lenBranch[lidx].Value, path.AppendElement(j)));
                         }
-                    }); //end inner parallel loop
-
-                    lock (resultTree)
-                    {
-                        for (int j = 0; j < dividedCurves.Count(); j++)
+                        else
                         {
-                            if (dividedCurves[j] != null)
-                            {
-                                GH_Path targetPath = path.AppendElement(j);
-                                resultTree.AppendRange(dividedCurves[j].pointArray, targetPath);
-                            }
-                        }
-                    }
-                    lock (tanTree)
-                    {
-                        for (int j = 0; j < dividedCurves.Count(); j++)
-                        {
-                            if (dividedCurves[j] != null)
-                            {
-                                GH_Path targetPath = path.AppendElement(j);
-                                tanTree.AppendRange(dividedCurves[j].vectorArray, targetPath);
-                            }
-                        }
-                    }
-                    lock (paramTree)
-                    {
-                        for (int j = 0; j < dividedCurves.Count(); j++)
-                        {
-                            if (dividedCurves[j] != null)
-                            {
-                                GH_Path targetPath = path.AppendElement(j);
-                                paramTree.AppendRange(dividedCurves[j].paramArray, targetPath);
-                            }
+                            NullDivisions.Add(path.AppendElement(j));
                         }
                     }
                 } 
                 else //Empty Case
                 {
-                    lock (resultTree)
+                    for (int j = 0; j < Math.Max(1,len); j++)
                     {
-                        resultTree.EnsurePath(path.AppendElement(0));
-                    }
-                    lock (tanTree)
-                    {
-                        tanTree.EnsurePath(path.AppendElement(0));
-                    }
-                    lock (paramTree)
-                    {
-                        paramTree.EnsurePath(path.AppendElement(0));
+                        NullDivisions.Add(path.AppendElement(j));
                     }
                 }
+                   
+            }
+            //todo: profile this segment -^ relative to the heavy comp below on larger solns.
+
+            //Zoom Zoom
+            Parallel.For(0, DivisionSetup.Count, i => {
+                DivisionSetup[i].Divide();
             });
+
+            //Optimise this - is it possible to get these parallelised as well?
+            foreach (CurveDivider division in DivisionSetup)
+            {
+                division.AssignTrees(resultTree, tanTree, paramTree);
+            }
+
+            foreach(GH_Path nullPath in NullDivisions)
+            {
+                resultTree.EnsurePath(nullPath);
+                tanTree.EnsurePath(nullPath);
+                paramTree.EnsurePath(nullPath);
+            }
+
 
             DA.SetDataTree(0, resultTree);
             DA.SetDataTree(1, tanTree);
@@ -167,76 +151,18 @@ namespace Impala
                 return false;
             }
             bool flag = true;
-            /*if (!curve.Value.IsValid)
+            if (!curve.IsValid || curve.Value.GetLength() < Rhino.RhinoMath.ZeroTolerance)
             {
-                double val = curve.Value.GetLength();
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Curve.");
                 flag = false;
-            }*/
+            }
             if (!(length.Value > 0) || length.Value <= Rhino.RhinoMath.ZeroTolerance)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Division Length.");
+                //Not thread safe?
                 flag = false;
             }
             return flag;
-        }
-
-        public class CurveDivider
-        {
-            private Curve crv;
-            private double divLen;
-            private int divisions;
-
-            public GH_Point[] pointArray;
-            public GH_Vector[] vectorArray;
-            public GH_Number[] paramArray;
-
-            public CurveDivider(Curve crv, double divLen)
-            {
-                this.crv = crv.DuplicateCurve();
-                this.divLen = divLen;
-                double curveLen = crv.GetLength();
-                divisions = Convert.ToInt32(Math.Ceiling(curveLen / divLen)) + 1;
-
-                pointArray = new GH_Point[divisions];
-                vectorArray = new GH_Vector[divisions];
-                paramArray = new GH_Number[divisions];
-            }
-
-            public void Divide()
-            {
-                double[] parArray = new double[divisions + 5];
-                Point3d[] tempPts = new Point3d[divisions + 10];
-
-                if (divisions > 1)
-                {
-                    parArray = crv.DivideByLength(divLen, true, out tempPts);
-                    for(int i = 0; i < tempPts.Count(); i++)
-                    {
-                        if (tempPts[i] != null) {
-                            pointArray[i] = new GH_Point(tempPts[i]);
-                        }
-                        else
-                        {
-                            pointArray[i] = null;
-                        }
-                    }
-                    if (parArray != null)
-                    {
-                        for (int i = 0; i < parArray.Count(); i++)
-                        {
-                            paramArray[i] = new GH_Number(parArray[i]);
-                            vectorArray[i] = new GH_Vector(crv.TangentAt(parArray[i]));
-                        }
-                    }
-                }
-                else
-                {
-                    pointArray = new GH_Point[]{ new GH_Point(crv.PointAtStart) };
-                    paramArray = new GH_Number[]{ new GH_Number(0.0) };
-                    vectorArray = new GH_Vector[]{ new GH_Vector(crv.TangentAtStart) };
-                }
-            }
         }
 
         /// <summary>
@@ -260,4 +186,110 @@ namespace Impala
             get { return new Guid("17245910-2f8b-4172-be42-686f34fbe74a"); }
         }
     }
+
+    public class CurveDivider
+    {
+        private Curve crv;
+        private double divLen;
+        private int divisions;
+        
+        private Point3d start;
+        private Vector3d startTangent;
+
+        public GH_Point[] pointArray;
+        public GH_Vector[] vectorArray;
+        public GH_Number[] paramArray;
+        public GH_Path targetPath;
+
+        public CurveDivider(Curve crv, double divLen, GH_Path targetPath)
+        {
+            this.crv = (Curve)crv.Duplicate();
+            this.divLen = divLen;
+            this.start = crv.PointAtStart;
+            this.startTangent = crv.TangentAtStart;
+            double curveLen = crv.GetLength();
+            divisions = Convert.ToInt32(Math.Floor(curveLen / divLen)) + 1;
+
+            pointArray = new GH_Point[divisions];
+            vectorArray = new GH_Vector[divisions];
+            paramArray = new GH_Number[divisions];
+            this.targetPath = targetPath;
+        }
+
+        public void Divide()
+        {
+            double[] parArray;// = new double[divisions];
+            Point3d[] tempPts;// = new Point3d[divisions];
+
+            if (divisions > 1)
+            {
+                parArray = crv.DivideByLength(divLen, true, out tempPts);
+                if (tempPts != null)
+                {
+                    for (int i = 0; i < tempPts.Count(); i++)
+                    {
+                        if (tempPts[i] != null)
+                        {
+                            pointArray[i] = new GH_Point(tempPts[i]);
+                        }
+                        else
+                        {
+                            pointArray[i] = null;
+                        }
+                    }
+                    if (parArray != null)
+                    {
+                        for (int i = 0; i < parArray.Count(); i++)
+                        {
+                            paramArray[i] = new GH_Number(parArray[i]);
+                            vectorArray[i] = new GH_Vector(crv.TangentAt(parArray[i]));
+                        }
+                    }
+                }
+                else
+                {
+                    pointArray = null;
+                    paramArray = null;
+                    vectorArray = null;
+                }
+            }
+            else
+            {
+                pointArray = new GH_Point[] { new GH_Point(start) };
+                paramArray = new GH_Number[] { new GH_Number(0.0) };
+                vectorArray = new GH_Vector[] { new GH_Vector(startTangent)};
+            }
+        }
+
+        public void AssignTrees(GH_Structure<GH_Point> results, GH_Structure<GH_Vector> tangents, GH_Structure<GH_Number> parameters)
+        {
+            if (pointArray != null)
+            {
+                results.AppendRange(pointArray, targetPath);
+            }
+            else
+            {
+                results.EnsurePath(targetPath);
+            }
+
+            if (paramArray != null)
+            {
+                parameters.AppendRange(paramArray, targetPath);
+            }
+            else
+            {
+                parameters.EnsurePath(targetPath);
+            }
+            if (vectorArray != null)
+            {
+                tangents.AppendRange(vectorArray, targetPath);
+            }
+            else
+            {
+                tangents.EnsurePath(targetPath);
+            }
+
+        }
+    }
+
 }
