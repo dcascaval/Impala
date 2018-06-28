@@ -62,6 +62,7 @@
     <Compile Include="ImpalaComponent.cs" />
     <Compile Include="ImpalaInfo.cs" />
     <Compile Include="ParDivideLength.cs" />
+    <Compile Include="ParMeshCP.cs" />
     <Compile Include="ParMeshFlow.cs" />
     <Compile Include="ParClosestCurveCP.cs" />
     <Compile Include="ParCurveCP.cs" />
