@@ -29,6 +29,8 @@ namespace Impala
         {
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.hidden;
+
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
@@ -54,8 +56,8 @@ namespace Impala
             if (!DA.GetDataTree(0, out GH_Structure<GH_Number> a1)) return;
             if (!DA.GetDataTree(1, out GH_Structure<GH_Number> b1)) return;
 
-            var result = ZipMaxManual(a1, b1, (a, b) => new GH_Number(a.Value / b.Value));
-            DA.SetDataTree(0,result);
+            //var result = ZipMaxManual(a1, b1, (a, b) => new GH_Number(a.Value / b.Value));
+            //DA.SetDataTree(0,result);
         }
 
         /// <summary>
@@ -95,6 +97,8 @@ namespace Impala
         {
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.hidden;
+
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
@@ -125,8 +129,8 @@ namespace Impala
             if (!DA.GetDataTree(0, out GH_Structure<GH_Number> a1)) return;
             if (!DA.GetDataTree(1, out GH_Structure<GH_Number> b1)) return;
 
-            var result = ZipMaxParallel1D(a1,b1, (a, b) => new GH_Number(a.Value / b.Value));
-            DA.SetDataTree(0, result);
+            //var result = ZipMaxParallel1D(a1,b1, (a, b) => new GH_Number(a.Value / b.Value));
+            //DA.SetDataTree(0, result);
         }
 
         protected override void AfterSolveInstance()

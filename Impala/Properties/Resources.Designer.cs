@@ -63,6 +63,16 @@ namespace Impala.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap blank {
+            get {
+                object obj = ResourceManager.GetObject("blank", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap impala_main {
             get {
                 object obj = ResourceManager.GetObject("impala_main", resourceCulture);
@@ -76,6 +86,46 @@ namespace Impala.Properties {
         internal static System.Drawing.Bitmap parccp {
             get {
                 object obj = ResourceManager.GetObject("parccp", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap qadd {
+            get {
+                object obj = ResourceManager.GetObject("qadd", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap qdiv {
+            get {
+                object obj = ResourceManager.GetObject("qdiv", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap qmult {
+            get {
+                object obj = ResourceManager.GetObject("qmult", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap qsub {
+            get {
+                object obj = ResourceManager.GetObject("qsub", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

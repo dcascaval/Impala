@@ -38,6 +38,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
@@ -59,6 +62,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ErrorChecker.cs" />
     <Compile Include="Generic.cs" />
     <Compile Include="ImpalaComponent.cs" />
     <Compile Include="ImpalaInfo.cs" />
@@ -75,7 +79,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="QuickAdd.cs" />
+    <Compile Include="QuickDivide.cs" />
     <Compile Include="QuickMath.cs" />
+    <Compile Include="QuickMultiply.cs" />
     <Compile Include="QuickSubtract.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +103,21 @@
   <ItemGroup>
     <None Include="Resources\parccp.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\qadd.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\qdiv.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\qmult.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\qsub.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\blank.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -117,5 +138,6 @@ Erase "$(TargetPath)"</PostBuildEvent>
     <StartArguments>
     </StartArguments>
     <StartAction>Program</StartAction>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 </Project>

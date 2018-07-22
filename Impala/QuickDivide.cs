@@ -1,28 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 
-using static Impala.Generic;
 
-namespace Impala
+namespace Impala.MathComponents
 {
-    public class QuickDivide : QuickMath
+    public class QuickDivide : QuickMath<GH_Number>
     {
+        public Error<(GH_Number, GH_Number)> ZeroError;
+
         /// <summary>
-        /// Initializes a new instance of the QuickAdd class.
+        /// Initializes a new instance of the QuickDivide class.
         /// </summary>
         public QuickDivide()
           : base("QuickDivide", "qDiv",
               "Divides two numbers or integers.",
               "Impala", "Math")
         {
+            ZeroError = new Error<(GH_Number,GH_Number)>(ZeroCheck, ZeroHandle, this);
+            CheckError.AddError(ZeroError);
         }
 
         public override Func<GH_Number, GH_Number, GH_Number> Operation { get { return (a, b) => new GH_Number(a.Value / b.Value); } }
 
+        public static Func<(GH_Number, GH_Number), bool> ZeroCheck = (a) => Math.Abs(a.Item2.Value) > 0;
+        public static Action<GH_Component> ZeroHandle = comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Division by Zero!");
 
         /// <summary>
         /// Provides an Icon for the component.
@@ -31,9 +34,7 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.qdiv;
             }
         }
 
@@ -45,4 +46,5 @@ namespace Impala
             get { return new Guid("727d172e-13f9-4ed9-b2fa-da4d10cec169"); }
         }
     }
+
 }

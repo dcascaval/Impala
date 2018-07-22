@@ -7,13 +7,11 @@ using Grasshopper.Kernel.Types;
 
 using static Impala.Generic;
 
-namespace Impala
+namespace Impala.MathComponents
 {
-    public class QuickMultiply : QuickMath
+    public class QuickMultiply : QuickMath<GH_Number>
     {
-        /// <summary>
-        /// Initializes a new instance of the QuickAdd class.
-        /// </summary>
+
         public QuickMultiply()
           : base("QuickMultiply", "qMult",
               "Multiplies two numbers or integers together.",
@@ -30,9 +28,7 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.qmult;
             }
         }
 
@@ -44,4 +40,5 @@ namespace Impala
             get { return new Guid("ebbb8d13-2296-4840-ac31-3d5ae4bf9c06"); }
         }
     }
+
 }
