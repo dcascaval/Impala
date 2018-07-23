@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Impala.Properties {
+namespace Impala.MathComponents.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Impala.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Impala.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Impala.MathComponents.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -66,26 +66,6 @@ namespace Impala.Properties {
         internal static System.Drawing.Bitmap blank {
             get {
                 object obj = ResourceManager.GetObject("blank", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap impala_main {
-            get {
-                object obj = ResourceManager.GetObject("impala_main", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap parccp {
-            get {
-                object obj = ResourceManager.GetObject("parccp", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

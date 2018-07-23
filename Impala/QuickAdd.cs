@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-
-using static Impala.Generic;
 
 namespace Impala.MathComponents
 {
-    public class QuickAdd : QuickMath<GH_Number>
+    public class QuickAdd : QuickMath<GH_Number,GH_Number>
     {
         /// <summary>
         /// Initializes a new instance of the QuickAdd class.
@@ -22,6 +16,8 @@ namespace Impala.MathComponents
         }
 
         public override Func<GH_Number, GH_Number, GH_Number> Operation { get { return (a, b) => new GH_Number(a.Value + b.Value); } }
+        public override Type InputType => Type.Number;
+        public override Type OutputType => Type.Number;
 
         /// <summary>
         /// Provides an Icon for the component.
@@ -30,7 +26,7 @@ namespace Impala.MathComponents
         {
             get
             {
-                return Impala.Properties.Resources.qadd;
+                return null;//Impala.Properties.Resources.qadd;
             }
         }
 
@@ -39,11 +35,14 @@ namespace Impala.MathComponents
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("f3795cf2-4791-4eca-a2c0-1b49ffb5fb90"); }
+            get { return new Guid("62D8A3D4-475E-45C9-8B3F-786D3737865C"); }
         }
     }
 
-    public class VectorAdd : QuickMath<GH_Vector>
+
+
+
+    public class VectorAdd : QuickMath<GH_Vector,GH_Vector>
     {
         /// <summary>
         /// Initializes a new instance of the QuickSubtract class.
@@ -56,6 +55,8 @@ namespace Impala.MathComponents
         }
 
         public override Func<GH_Vector, GH_Vector, GH_Vector> Operation { get { return (a, b) => new GH_Vector(a.Value + b.Value); } }
+        public override Type InputType => Type.Vector;
+        public override Type OutputType => Type.Vector;
 
         /// <summary>
         /// Provides an Icon for the component.
@@ -64,7 +65,7 @@ namespace Impala.MathComponents
         {
             get
             {
-                return Impala.Properties.Resources.qadd;
+                return null;//Impala.Properties.Resources.qadd;
             }
         }
 
@@ -73,7 +74,7 @@ namespace Impala.MathComponents
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("D77EC2FD-DAE9-48CB-A3EB-09B5283844B9"); }
+            get { return new Guid("4DB2AB81-D9A5-4A6C-B177-3CACADF2A535"); }
         }
     }
 }

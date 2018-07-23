@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
-using Grasshopper.Kernel.Types;
 
-namespace Impala
+namespace Impala.MathComponents
 {
     static class Errors
     {

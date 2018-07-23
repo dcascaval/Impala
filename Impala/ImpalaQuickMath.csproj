@@ -8,8 +8,8 @@
     <ProjectGuid>{7FF1740E-D59A-4A14-9DB3-A65DB74480B8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Impala</RootNamespace>
-    <AssemblyName>Impala</AssemblyName>
+    <RootNamespace>Impala.MathComponents</RootNamespace>
+    <AssemblyName>ImpalaQuickMath</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -32,46 +32,37 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="KdTreeLib, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\KdTree.1.4.1\lib\net45\KdTreeLib.dll</HintPath>
+    <Reference Include="GH_IO">
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 6\Plug-ins\Grasshopper\GH_IO.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="GH_Util">
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 6\Plug-ins\Grasshopper\GH_Util.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Grasshopper">
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 6\Plug-ins\Grasshopper\Grasshopper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RhinoCommon">
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
-    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    <Reference Include="System.ValueTuple">
+      <HintPath>..\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="RhinoCommon">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Rhinoceros 5 (64-bit)\System\RhinoCommon.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Grasshopper">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Dan\AppData\Roaming\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.76.0\Grasshopper.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="GH_IO">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Dan\AppData\Roaming\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.76.0\GH_IO.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ErrorChecker.cs" />
     <Compile Include="Generic.cs" />
-    <Compile Include="ImpalaComponent.cs" />
     <Compile Include="ImpalaInfo.cs" />
-    <Compile Include="ParDivideLength.cs" />
-    <Compile Include="ParMeshCP.cs" />
-    <Compile Include="ParMeshFlow.cs" />
-    <Compile Include="ParClosestCurveCP.cs" />
-    <Compile Include="ParCurveCP.cs" />
-    <Compile Include="ParPointCP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -92,16 +83,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Resources\impala_main.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\impala_ccp.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\imapala_ccp.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\parccp.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\qadd.png" />

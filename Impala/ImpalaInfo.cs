@@ -2,7 +2,7 @@
 using System.Drawing;
 using Grasshopper.Kernel;
 
-namespace Impala
+namespace Impala.MathComponents
 {
     public class ImpalaInfo : GH_AssemblyInfo
     {
@@ -10,7 +10,7 @@ namespace Impala
         {
             get
             {
-                return "Impala";
+                return "ImpalaQuickMath";
             }
         }
         public override Bitmap Icon
@@ -18,7 +18,7 @@ namespace Impala
             get
             {
                 //Return a 24x24 pixel bitmap to represent this GHA library.
-                return Impala.Properties.Resources.impala_main;
+                return null; //Impala.Properties.Resources.impala_main;
             }
         }
         public override string Description
@@ -26,14 +26,14 @@ namespace Impala
             get
             {
                 //Return a short string describing the purpose of this GHA library.
-                return "Parallel components for scalable and physical design computation";
+                return "Fork of Impala : Parallel components for fast, generic math in Grasshopper";
             }
         }
         public override Guid Id
         {
             get
             {
-                return new Guid("f0950c51-e05e-4f9e-b61e-16b335abfcdd");
+                return new Guid("223830D7-8769-44A5-B0A9-14096E29FB8A");
             }
         }
 
