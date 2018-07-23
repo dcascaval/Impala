@@ -11,11 +11,17 @@ using Grasshopper.Kernel.Types;
 namespace Impala
 {
 
-
+    /// <summary>
+    /// Collection of static generic methods that operate on GH_Structures and 
+    /// provide built-in looping and parallel functionality.
+    /// </summary>
     public static class Generic
     {
-
-
+        /// <summary>
+        /// Creates the list of target paths for the looping logic. 
+        /// </summary>
+        /// <param name="structures"> Input structures to analyze </param>
+        /// <returns>The paths of the structure that serve as the base of the output</returns>
         static List<GH_Path> GetPathList(params IGH_Structure[] structures)
         {
             var lenList = (from structure in structures select structure.get_Path(structure.LongestPathIndex()).Length).ToList();
@@ -34,6 +40,12 @@ namespace Impala
             return PathList;
         }
 
+        /// <summary>
+        /// Fetches a path from the path list, and creates it if there is no existing path at this index.
+        /// </summary>
+        /// <param name="paths"> List of paths generated from GetPathList </param>
+        /// <param name="i"> Desired path index </param>
+        /// <returns> Path at that index </returns>
         static private GH_Path GetPath(List<GH_Path> paths, int i)
         {
             GH_Path path = new GH_Path();
@@ -47,9 +59,61 @@ namespace Impala
             }
             return path;
         }
-        
+
         /// <summary>
-        /// Aapplies GH's default tree matching logic when applying an action that takes in two datatrees. 
+        /// Super-Generic N x M, Dual-Parallel zip.
+        /// </summary>
+        /// <param name="inputs"></param>
+        /// <param name="action"></param>
+        /// <param name="error"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        public static GH_Structure<IGH_Goo>[] ZipMaxN(GH_Structure<IGH_Goo>[] inputs, Func<IGH_Goo[],IGH_Goo[]> action, ErrorChecker<IGH_Goo[]> error, int output)
+        {
+            var opLen = Enumerable.Range(0, output);
+            GH_Structure<IGH_Goo>[] results = opLen.Select(_ => new GH_Structure<IGH_Goo>()).ToArray();
+            var maxbranch = inputs.Select(i => i.Branches.Count).Max();
+            var prePaths = GetPathList(inputs);
+            var paths = Enumerable.Range(0, maxbranch).Select(i => GetPath(prePaths, i)).ToArray();
+
+            for (int i = 0; i < maxbranch; i++) // Reverse this ?
+            {
+                for (int k = 0; k < output; k++)
+                {
+                    results[k].EnsurePath(paths[i]);
+                }
+            }
+
+            Parallel.For(0, maxbranch, i =>
+            {
+                var path = paths[i];
+                var branches = inputs.Select(inp => inp.Branches[Math.Min(i, inp.Branches.Count - 1)]);
+                var branchlens = branches.Select(br => br.Count);
+                if (branchlens.Min() > 0)
+                {
+                    var maxlen = branchlens.Max();
+                    var resultbranches = opLen.Select(_ => new IGH_Goo[maxlen]).ToArray();
+                    Parallel.For(0, maxlen, j =>
+                    {
+                        var args = (from br in branches select br[Math.Min(j, br.Count - 1)]).ToArray();
+                        IGH_Goo[] calc = error.Validate(args) ? action(args) : opLen.Select(_ => default(IGH_Goo)).ToArray();
+                        for (int k = 0; k < calc.Length; k++)   // K branches of J length each
+                        {
+                            resultbranches[k][j] = calc[k];
+                        }
+                    });
+                    for (int k = 0; k < resultbranches.Length; k++)
+                    {
+                        results[k].AppendRange(resultbranches[k], path);
+                    }
+                }
+            });
+
+            return results;
+        }
+
+        /// <summary>
+        /// Applies GH's default tree matching logic when applying an action that takes in two datatrees and outputs one.
         /// </summary>
         public static GH_Structure<R> ZipMaxManual<T, Q, R>(GH_Structure<T> a, GH_Structure<Q> b, Func<T, Q, R> action, ErrorChecker<(T,Q)> error)
             where T : IGH_Goo
@@ -72,7 +136,7 @@ namespace Impala
                     {
                         T ax = ba[Math.Min(ba.Count - 1, j)];
                         Q bx = bb[Math.Min(bb.Count - 1, j)];
-                        //Only god can help us now
+                        // Check and input
                         temp[j] = error.Validate((ax, bx)) ? action(ax, bx) : default;
                     }
                     result.AppendRange(temp,GetPath(paths,i));
@@ -85,7 +149,74 @@ namespace Impala
             return result;
         }
 
+        /// <summary>
+        /// Helper conversion delegate to use in the DuplicateCast method to be able to operate generically on GH_Structures
+        /// </summary>
+        public static IGH_Goo Gooify<T>(T data)
+            where T : IGH_Goo
+        {
+            return data;
+        }
 
+        /// <summary>
+        /// Applies GH's default tree matching logic when applying an action that takes and outputs 3 datatrees. 
+        /// This is about the limit at which manually defining the structure is still viable.
+        /// Both levels (per-branch and per-list) are parallelised.
+        /// </summary>
+        public static (GH_Structure<A>,GH_Structure<B>,GH_Structure<C>) ZipMaxTree3x3 <T, Q, R, A, B, C>(GH_Structure<T> a, 
+            GH_Structure<Q> b, GH_Structure<R> c, Func<T, Q, R, (A,B,C)> action, ErrorChecker<(T, Q, R)> error)
+            where T : IGH_Goo where Q : IGH_Goo where R : IGH_Goo
+            where A : IGH_Goo where B : IGH_Goo where C : IGH_Goo
+        {
+
+            var result1 = new GH_Structure<A>();
+            var result2 = new GH_Structure<B>();
+            var result3 = new GH_Structure<C>();
+            //GH_Structure<IGH_Goo>[] results = { result1.DuplicateCast(Gooify), result2.DuplicateCast(Gooify), result3.DuplicateCast(Gooify) };
+
+            var maxbranch = Math.Max(a.Branches.Count, b.Branches.Count);
+            var paths = GetPathList(a, b);
+
+            for(int i = 0; i < maxbranch; i++)
+            {
+                var targpath = GetPath(paths, i);
+                result1.EnsurePath(targpath);
+                result2.EnsurePath(targpath);
+                result3.EnsurePath(targpath); 
+            }
+
+            //Dual nested Parallel Loops! Chunky. 
+            Parallel.For(0, maxbranch, i =>
+            {
+               var targpath = GetPath(paths, i);
+               var ba = a.Branches[Math.Min(i, a.Branches.Count - 1)];
+               var bb = b.Branches[Math.Min(i, b.Branches.Count - 1)];
+               var bc = c.Branches[Math.Min(i, c.Branches.Count - 1)];
+               if (ba.Count > 0 && bb.Count > 0 && bc.Count > 0)
+               {
+                   int maxlen = Math.Max(Math.Max(ba.Count, bb.Count), bc.Count);
+                   (A, B, C)[] temp = new(A, B, C)[maxlen];
+                    Parallel.For(0, maxlen, j =>
+                    {
+                        T ax = ba[Math.Min(ba.Count - 1, j)];
+                        Q bx = bb[Math.Min(bb.Count - 1, j)];
+                        R cx = bc[Math.Min(bc.Count - 1, j)];
+                        // Check and input
+                        temp[j] = error.Validate((ax, bx, cx)) ? action(ax, bx, cx) : default;
+                    });
+
+                   result1.AppendRange(from item in temp select item.Item1, targpath);
+                   result2.AppendRange(from item in temp select item.Item2, targpath);
+                   result3.AppendRange(from item in temp select item.Item3, targpath);
+               }
+            });
+
+            return (result1,result2,result3);
+        }
+
+        /// <summary>
+        /// Applies GH's looping in a 2->1 scenario with the outer level (per-branch) parallelised.
+        /// </summary>
         public static GH_Structure<R> ZipMaxParallel1D<T, Q, R>(GH_Structure<T> a, GH_Structure<Q> b, Func<T, Q, R> action)
             where T : IGH_Goo
             where Q : IGH_Goo
@@ -118,7 +249,9 @@ namespace Impala
             return result;
         }
 
-
+        /// <summary>
+        /// Applies GH's looping in a 2->1 scenario with both per-branch and per-list parallelism.
+        /// </summary>
         public static GH_Structure<R> ZipMaxParallel2D<T, Q, R>(GH_Structure<T> a, GH_Structure<Q> b, Func<T, Q, R> action)
             where T : IGH_Goo
             where Q : IGH_Goo
@@ -215,7 +348,7 @@ namespace Impala
             return result;
         }
 
-        // This is sadly less effective than the manual array allocation
+        // This is sadly less effective than the manual array allocation.
         // Todo: bench this on long lists and lots of short ones
         private static IEnumerable<R> ZipListMax<T, Q, R>(List<T> a, List<Q> b, Func<T, Q, R> action)
         {

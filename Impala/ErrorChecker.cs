@@ -6,6 +6,11 @@ using Grasshopper.Kernel.Types;
 
 namespace Impala
 {
+    static class Errors
+    {
+        public static Action<GH_Component> NullHandle = comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Null value!");
+    }
+
     public class ErrorChecker<T>
     {
         List<Error<T>> errs;

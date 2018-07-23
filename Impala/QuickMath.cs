@@ -6,6 +6,7 @@ using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Data;
 
 using static Impala.Generic;
+using static Impala.Errors;
 using Rhino.Geometry;
 
 namespace Impala.MathComponents
@@ -26,10 +27,9 @@ namespace Impala.MathComponents
             CheckError = new ErrorChecker<(T, T)>(NullError);
         }
 
-
         public abstract Func<T, T, T> Operation { get; }
         public static Func<(T, T), bool> NullCheck = (a) => a.Item1 != null && a.Item2 != null;
-        public static Action<GH_Component> NullHandle = comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Null value!");
+        
  
 
         /// <summary>
