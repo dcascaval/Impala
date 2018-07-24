@@ -16,7 +16,7 @@ namespace Impala.MathComponents
         public QuickDivide()
           : base("QuickDivide", "qDiv",
               "Divides two numbers or integers.",
-              "Impala", "Math")
+              "Maths", "Quick")
         {
             ZeroError = new Error<(GH_Number,GH_Number)>(ZeroCheck, ZeroHandle, this);
             CheckError.AddError(ZeroError);

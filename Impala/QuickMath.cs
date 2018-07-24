@@ -24,7 +24,7 @@ namespace Impala.MathComponents
         /// Initializes the default handlers for a QuickMath component
         /// </summary>
         public QuickMath(string n, string nn,string d,string c,string sc)
-          : base(n,nn,d,c,sc)
+          : base(n,nn,d,"Maths","Quick")
         {
             NullError  = new Error<(T, T)>(NullCheck, NullHandle, this);
             CheckError = new ErrorChecker<(T, T)>(NullError);
@@ -46,8 +46,8 @@ namespace Impala.MathComponents
         {
             switch (InputType) {
                 case Type.Number: 
-                      pManager.AddNumberParameter("A", "A", "Number", GH_ParamAccess.tree);
-                      pManager.AddNumberParameter("B", "B", "Number", GH_ParamAccess.tree);
+                    pManager.AddNumberParameter("A", "A", "Number", GH_ParamAccess.tree);
+                    pManager.AddNumberParameter("B", "B", "Number", GH_ParamAccess.tree);
                     break;
                 case Type.Vector:
                     pManager.AddVectorParameter("A", "A", "Vector or Point", GH_ParamAccess.tree);
@@ -85,7 +85,7 @@ namespace Impala.MathComponents
             if (!DA.GetDataTree(0, out GH_Structure<T> a1)) return;
             if (!DA.GetDataTree(1, out GH_Structure<T> b1)) return;
 
-            var result = ZipMaxManual(a1, b1, Operation, CheckError);
+            var result = ZipMaxParallel1D(a1, b1, Operation, CheckError, 10000);
             DA.SetDataTree(0, result);
         }
     }

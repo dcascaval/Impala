@@ -6,7 +6,21 @@ namespace Impala.MathComponents
 {
     static class Errors
     {
+        public static bool EmptyCheck<T>(List<T> input)
+        {
+            return input.Count != 0;
+        }
         public static Action<GH_Component> NullHandle = comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Null value!");
+        public static Action<GH_Component> EmptyHandle = comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Empty Branch!");
+
+        public static bool CheckListNull<T>(List<T> input)
+        {
+            for (int i = 0; i < input.Count; i++)
+            {
+                if (input[i] == null) return false;
+            }
+            return true;
+        }
     }
 
     public class ErrorChecker<T>
@@ -26,13 +40,11 @@ namespace Impala.MathComponents
 
         public bool Validate(T input)
         {
-            bool flag = true;
             foreach (var err in errs)
             {
-                flag &= err.Validate(input);
-                if (!flag) return false;
+                if (!err.Validate(input)) return false;
             }
-            return flag;
+            return true;
         }
     }
 

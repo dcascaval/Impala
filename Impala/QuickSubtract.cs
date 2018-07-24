@@ -11,7 +11,7 @@ namespace Impala.MathComponents
         public QuickSubtract()
            : base("QuickSubtract", "qSub",
               "Subtract two numbers or integers.",
-              "Impala", "Math")
+              "Maths", "Quick")
         {
         }
 
@@ -47,7 +47,7 @@ namespace Impala.MathComponents
         public VectorSubtract()
            : base("VecSubtract", "vSub",
               "Subtract two points or vectors.",
-              "Impala", "Math")
+              "Maths", "Quick")
         {
         }
 

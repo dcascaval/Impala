@@ -30,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GH_IO">
@@ -69,10 +70,19 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="QuickAbs.cs" />
     <Compile Include="QuickAdd.cs" />
+    <Compile Include="QuickAEQ.cs" />
+    <Compile Include="QuickAvg.cs" />
+    <Compile Include="QuickBounds.cs" />
     <Compile Include="QuickDivide.cs" />
+    <Compile Include="QuickEq.cs" />
+    <Compile Include="QuickGT.cs" />
+    <Compile Include="QuickLT.cs" />
     <Compile Include="QuickMath.cs" />
+    <Compile Include="QuickMod.cs" />
     <Compile Include="QuickMultiply.cs" />
+    <Compile Include="QuickNeg.cs" />
     <Compile Include="QuickSubtract.cs" />
   </ItemGroup>
   <ItemGroup>

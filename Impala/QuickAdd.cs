@@ -11,7 +11,7 @@ namespace Impala.MathComponents
         public QuickAdd()
           : base("QuickAdd", "qAdd",
               "Adds two numbers or integers together.",
-              "Impala", "Math")
+              "Maths", "Quick")
         {
         }
 
@@ -50,7 +50,7 @@ namespace Impala.MathComponents
         public VectorAdd()
            : base("VecAdd", "vAdd",
               "Add two points or vectors.",
-              "Impala", "Math")
+              "Maths", "Quick")
         {
         }
 

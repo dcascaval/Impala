@@ -9,7 +9,7 @@ namespace Impala.MathComponents
         public QuickMultiply()
           : base("QuickMultiply", "qMult",
               "Multiplies two numbers or integers together.",
-              "Impala", "Math")
+              "Maths", "Quick")
         {
         }
 
