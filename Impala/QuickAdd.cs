@@ -26,7 +26,7 @@ namespace Impala
         {
             get
             {
-                return null;//Impala.Properties.Resources.qadd;
+                return Properties.Resources.plus;
             }
         }
 
@@ -65,7 +65,7 @@ namespace Impala
         {
             get
             {
-                return null;//Impala.Properties.Resources.qadd;
+                return Properties.Resources.plus;
             }
         }
 

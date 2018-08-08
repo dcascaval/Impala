@@ -127,6 +127,45 @@
   <ItemGroup>
     <None Include="Resources\blank.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\abs.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\AEQ.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\AGT.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ALT.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bounds.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\division.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\equal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\minus.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\multiply.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\negation.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\parabolic.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\percentage.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\plus.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -26,7 +26,7 @@ namespace Impala
         {
             get
             {
-                return null; //Impala.Properties.Resources.qsub;
+                return Properties.Resources.minus;
             }
         }
 
@@ -63,7 +63,7 @@ namespace Impala
         {
             get
             {
-                return null; //Impala.Properties.Resources.qsub;
+                return Properties.Resources.minus;
             }
         }
 

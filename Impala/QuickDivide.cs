@@ -37,7 +37,7 @@ namespace Impala
         {
             get
             {
-                return null; //Impala.Properties.Resources.qdiv;
+                return Properties.Resources.division;
             }
         }
 

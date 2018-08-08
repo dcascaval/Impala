@@ -25,7 +25,7 @@ namespace Impala
         {
             get
             {
-                return null;//Impala.Properties.Resources.qmult;
+                return Properties.Resources.multiply;
             }
         }
 
