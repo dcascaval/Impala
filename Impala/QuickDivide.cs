@@ -4,9 +4,9 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 
 
-namespace Impala.MathComponents
+namespace Impala
 {
-    public class QuickDivide : QuickMath<GH_Number>
+    public class QuickDivide : QuickMath<GH_Number,GH_Number>
     {
         public Error<(GH_Number, GH_Number)> ZeroError;
 
@@ -16,12 +16,15 @@ namespace Impala.MathComponents
         public QuickDivide()
           : base("QuickDivide", "qDiv",
               "Divides two numbers or integers.",
-              "Impala", "Math")
+              "Maths", "Quick")
         {
             ZeroError = new Error<(GH_Number,GH_Number)>(ZeroCheck, ZeroHandle, this);
             CheckError.AddError(ZeroError);
         }
 
+
+        public override Type InputType => Type.Number;
+        public override Type OutputType => Type.Number;
         public override Func<GH_Number, GH_Number, GH_Number> Operation { get { return (a, b) => new GH_Number(a.Value / b.Value); } }
 
         public static Func<(GH_Number, GH_Number), bool> ZeroCheck = (a) => Math.Abs(a.Item2.Value) > 0;
@@ -34,7 +37,7 @@ namespace Impala.MathComponents
         {
             get
             {
-                return Impala.Properties.Resources.qdiv;
+                return null; //Impala.Properties.Resources.qdiv;
             }
         }
 
@@ -43,7 +46,7 @@ namespace Impala.MathComponents
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("727d172e-13f9-4ed9-b2fa-da4d10cec169"); }
+            get { return new Guid("82774602-41B1-46FF-BFFF-AD984F3BBD9E"); }
         }
     }
 

@@ -1,24 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-
-using Grasshopper.Kernel;
-using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 
-using static Impala.Generic;
-
-namespace Impala.MathComponents
+namespace Impala
 {
-    public class QuickMultiply : QuickMath<GH_Number>
+    public class QuickMultiply : QuickMath<GH_Number,GH_Number>
     {
 
         public QuickMultiply()
           : base("QuickMultiply", "qMult",
               "Multiplies two numbers or integers together.",
-              "Impala", "Math")
+              "Maths", "Quick")
         {
         }
 
+
+        public override Type InputType => Type.Number;
+        public override Type OutputType => Type.Number;
         public override Func<GH_Number, GH_Number, GH_Number> Operation { get { return (a, b) => new GH_Number(a.Value * b.Value); } }
 
         /// <summary>
@@ -28,7 +25,7 @@ namespace Impala.MathComponents
         {
             get
             {
-                return Impala.Properties.Resources.qmult;
+                return null;//Impala.Properties.Resources.qmult;
             }
         }
 
@@ -37,7 +34,7 @@ namespace Impala.MathComponents
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("ebbb8d13-2296-4840-ac31-3d5ae4bf9c06"); }
+            get { return new Guid("C89AFC63-DF42-42B2-B071-F30D4E7BC1E1"); }
         }
     }
 

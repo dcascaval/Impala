@@ -213,37 +213,79 @@ namespace Impala
 
             return (result1,result2,result3);
         }
+        public static (int, int)[] GetPartitions<T, Q>(GH_Structure<T> a, GH_Structure<Q> b, int granularity)
+            where T : IGH_Goo
+            where Q : IGH_Goo
+        {
+            var parts = Math.Min(a.DataCount,b.DataCount) / granularity;
+            if (parts < 2) return new(int, int)[] { (0, a.Branches.Count - 1) };
+
+            var PathLengths = new List<int>();
+            var maxbranch = Math.Max(a.Branches.Count, b.Branches.Count);
+            for (int i = 0; i < maxbranch; i++)
+            {
+                PathLengths.Add(Math.Max(a[Math.Min(a.Branches.Count - 1, i)].Count,
+                                         b[Math.Min(b.Branches.Count - 1, i)].Count));
+            }
+            var partitions = new List<(int, int)>();
+
+            var prevIdx = 0;
+            var tempGran = 0;
+            for (int i = 0; i < PathLengths.Count; i++)
+            {
+                tempGran += PathLengths[i];
+                if (tempGran > granularity)
+                {
+                    partitions.Add((prevIdx, i));
+                    prevIdx = i + 1;
+                    tempGran = 0;
+                }
+            }
+            if (prevIdx < PathLengths.Count - 1)
+            {
+                partitions.Add((prevIdx, PathLengths.Count - 1));
+            }
+
+            return partitions.ToArray();
+        }
+
 
         /// <summary>
         /// Applies GH's looping in a 2->1 scenario with the outer level (per-branch) parallelised.
         /// </summary>
-        public static GH_Structure<R> ZipMaxParallel1D<T, Q, R>(GH_Structure<T> a, GH_Structure<Q> b, Func<T, Q, R> action)
+        public static GH_Structure<R> ZipMaxParallel1D<T, Q, R>(GH_Structure<T> a, GH_Structure<Q> b, Func<T, Q, R> action, ErrorChecker<(T, Q)> error, int granularity)
             where T : IGH_Goo
             where Q : IGH_Goo
             where R : IGH_Goo
         {
             var result = new GH_Structure<R>();
             var maxbranch = Math.Max(a.Branches.Count, b.Branches.Count);
+            var partitions = GetPartitions(a, b, granularity);
+
             var paths = GetPathList(a, b);
             for (int i = 0; i < maxbranch; i++)
             {
                 result.EnsurePath(GetPath(paths, i));
             }
-            Parallel.For(0, maxbranch, i =>
+            Parallel.For(0, partitions.Length, p =>
             {
-                var ba = a.Branches[Math.Min(i, a.Branches.Count - 1)];
-                var bb = b.Branches[Math.Min(i, b.Branches.Count - 1)];
-                if (ba.Count > 0 && bb.Count > 0)
+                var part = partitions[p];
+                for (int i = part.Item1; i <= part.Item2; i++)
                 {
-                    int maxlen = Math.Max(ba.Count, bb.Count);
-                    R[] temp = new R[maxlen];
-                    for (int j = 0; j < maxlen; j++)
+                    var ba = a.Branches[Math.Min(i, a.Branches.Count - 1)];
+                    var bb = b.Branches[Math.Min(i, b.Branches.Count - 1)];
+                    if (ba.Count > 0 && bb.Count > 0)
                     {
-                        T ax = ba[Math.Min(ba.Count - 1, j)];
-                        Q bx = bb[Math.Min(bb.Count - 1, j)];
-                        temp[j] = action(ax, bx);
+                        int maxlen = Math.Max(ba.Count, bb.Count);
+                        R[] temp = new R[maxlen];
+                        for (int j = 0; j < maxlen; j++)
+                        {
+                            T ax = ba[Math.Min(ba.Count - 1, j)];
+                            Q bx = bb[Math.Min(bb.Count - 1, j)];
+                            temp[j] = error.Validate((ax, bx)) ? action(ax, bx) : default;
+                        }
+                        result.AppendRange(temp, GetPath(paths, i));
                     }
-                    result.AppendRange(temp, GetPath(paths, i));
                 }
             });
             return result;
@@ -307,15 +349,98 @@ namespace Impala
         /// <summary>
         /// Applies a function to every element in a tree without modifying its structure.
         /// </summary>
-        public static GH_Structure<Q> MapStruct<T, Q>(GH_Structure<T> init, Func<T, Q> action)
+        public static GH_Structure<Q> MapStructure<T, Q>(GH_Structure<T> init, Func<T, Q> action, ErrorChecker<T> error)
             where T : IGH_Goo
             where Q : IGH_Goo
         {
             var result = new GH_Structure<Q>();
             for (int i = 0; i < init.Branches.Count; i++)
             {
-                result.AppendRange(init.Branches[i].Select(action), init.Paths[i]);
+                result.AppendRange(init.Branches[i].Select(x => error.Validate(x) ? action(x) : default), init.Paths[i]);
             }
+            return result;
+        }
+
+
+        public static GH_Structure<Q> ReduceStructure<T, Q>(GH_Structure<T> init, Func<List<T>, Q> action, ErrorChecker<List<T>> error, int granularity)
+            where T : IGH_Goo
+            where Q : IGH_Goo
+        {
+            var result = new GH_Structure<Q>();
+            var partitions = GetPartitions1D(init, granularity);
+            for (int i = 0; i < init.Branches.Count; i++)
+            {
+                result.EnsurePath(init.Paths[i]);
+            }
+
+            Parallel.For(0, partitions.Length, i =>
+            {
+                var partition = partitions[i];
+                for (int j = partition.Item1; j <= partition.Item2; j++)
+                {
+                    var x = init.Branches[j];
+                    if (error.Validate(x))
+                    {
+                        result.Append(action(x), init.Paths[j]);
+                    }
+                }
+            });
+
+            return result;
+        }
+
+        public static (int, int)[] GetPartitions1D<T>(GH_Structure<T> a, int granularity)
+            where T : IGH_Goo
+        {
+            var PathLengths = a.Branches.Select(br => br.Count).ToList();
+            var partitions = new List<(int, int)>();
+            var parts = a.DataCount / granularity;
+            if (parts < 2) return new(int, int)[] { (0, a.Branches.Count - 1) };
+
+            var prevIdx = 0;
+            var tempGran = 0;
+            for (int i = 0; i < PathLengths.Count; i++)
+            {
+                tempGran += PathLengths[i];
+                if (tempGran > granularity)
+                {
+                    partitions.Add((prevIdx, i));
+                    prevIdx = i + 1;
+                    tempGran = 0;
+                }
+            }
+            if (prevIdx < PathLengths.Count - 1)
+            {
+                partitions.Add((prevIdx, PathLengths.Count - 1));
+            }
+
+            return partitions.ToArray();
+        }
+
+        /// <summary>
+        /// Applies a function with a specified granularity (number of items per parallel branch) 
+        /// </summary>
+        public static GH_Structure<Q> MapStructureParallel<T, Q>(GH_Structure<T> init, Func<T, Q> action, ErrorChecker<T> error, int granularity)
+            where T : IGH_Goo
+            where Q : IGH_Goo
+        {
+            var result = new GH_Structure<Q>();
+            var partitions = GetPartitions1D(init, granularity);           
+
+            for (int i = 0; i < init.Branches.Count; i++)
+            {
+                result.EnsurePath(init.Paths[i]);
+            }
+
+            Parallel.For(0, partitions.Length, i =>
+            {
+                var partition = partitions[i];
+                for (int j = partition.Item1; j <= partition.Item2; j++)
+                {
+                    result.AppendRange(init.Branches[j].Select(x => error.Validate(x) ? action(x) : default), init.Paths[j]);
+                }
+            });
+
             return result;
         }
 
