@@ -14,7 +14,7 @@ namespace Impala
 {
     public class ParCurveCP : GH_Component
     {
-        static ErrorChecker<(GH_Point, GH_Curve, GH_Number)> CheckError;
+
         /// <summary>
         /// Initializes a new instance of the Parallel Curve CP class.
         /// </summary>
@@ -27,10 +27,13 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Point, GH_Curve, GH_Number)>(error);
         }
 
+        static ErrorChecker<(GH_Point, GH_Curve, GH_Number)> CheckError;
+        static Func<(GH_Point, GH_Curve, GH_Number), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
+        protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Point", "P", "Point to sample from", GH_ParamAccess.tree);
             pManager.AddCurveParameter("Curve", "C", "Curve to test", GH_ParamAccess.tree);
@@ -40,7 +43,7 @@ namespace Impala
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddPointParameter("Point", "P", "Closest point on curve", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Parameter", "t", "Parameter on curve", GH_ParamAccess.tree);
@@ -64,9 +67,6 @@ namespace Impala
                 return (null, null, new GH_Boolean(false));
             }
         }
-
-        static Func<(GH_Point, GH_Curve, GH_Number), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
-
 
         /// <summary>
         /// This is the method that actually does the work.
@@ -107,7 +107,8 @@ namespace Impala
         }
     }
 
-    public class ParCurveCPManual : GH_Component
+    /* Generic NxM version
+    public class ParCurveCPGeneric : GH_Component
     {
         //public override GH_Exposure Exposure => GH_Exposure.hidden;
         private ErrorChecker<IGH_Goo[]> CheckError;
@@ -115,8 +116,8 @@ namespace Impala
         /// <summary>
         /// Initializes a new instance of the Parallel Curve CP class.
         /// </summary>
-        public ParCurveCPManual()
-          : base("Curve Closest Point A", "parCurveCPAuto",
+        public ParCurveCPGeneric()
+          : base("pCCPGen", "parCurveCPGeneric",
               "Closest Point on a curve to a sample, within a tolerance.",
               "Impala", "Physical")
         {
@@ -139,9 +140,10 @@ namespace Impala
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddPointParameter("Point", "P", "Point to sample from", GH_ParamAccess.tree);
-            pManager.AddCurveParameter("Curve", "C", "Curve to test", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Tolerance", "D", "Maximum testing distance", GH_ParamAccess.tree, Double.MaxValue);
+            pManager.AddGenericParameter("Point", "P", "Point to sample from", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Curve", "C", "Curve to test", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Tolerance", "D", "Maximum testing distance", GH_ParamAccess.tree);
+            this.Params.Input[2].Optional = true;
         }
 
         /// <summary>
@@ -154,41 +156,29 @@ namespace Impala
             pManager.AddBooleanParameter("Projected", "X", "Was the point moved?", GH_ParamAccess.tree);
         }
 
-        IGH_Goo PointToGoo (GH_Point data)
-        {
-            return data;
-        }
-
-        IGH_Goo CurveToGoo(GH_Curve data)
-        {
-            return data;
-        }
-
-        IGH_Goo NumToGoo(GH_Number data)
-        {
-            return data;
-        }
-
-        GH_Point GooToPoint (IGH_Goo data)
-        {
-            return (GH_Point)data;
-        }
-
-        GH_Number GooToNumber(IGH_Goo data)
-        {
-            return (GH_Number)data;
-        }
-
-        GH_Boolean GooToBool(IGH_Goo data)
-        {
-            return (GH_Boolean)data;
-        }
+        private static IGH_Goo[] _nullReturn = { null, null, new GH_Boolean(false) };
+        private object errlock = new Object();
+        private int errnum = 0;
 
         IGH_Goo[] CurveCP(IGH_Goo[] values)
         {
-            Point3d pt = ((GH_Point)values[0]).Value;
-            Curve crv = ((GH_Curve)values[1]).Value;
-            double tol = ((GH_Number)values[2]).Value;
+            GH_Point gpt = values[0] as GH_Point;
+            GH_Curve gcrv = values[1] as GH_Curve;
+            GH_Number gnum = values[2] as GH_Number;
+
+
+            if (gpt == null || gcrv == null || gnum == null)
+            {
+                lock (errlock)
+                {
+                    errnum++;
+                }
+                return _nullReturn;
+            }
+
+            Point3d pt = gpt.Value;
+            Curve crv = gcrv.Value;
+            double tol = gnum.Value;
 
             bool param = crv.ClosestPoint(pt, out double curveParam, tol);
             if (param)
@@ -198,10 +188,9 @@ namespace Impala
             }
             else
             {
-                return new IGH_Goo[] { null, null, new GH_Boolean(false) };
+                return _nullReturn;
             }
         }
-
 
 
         /// <summary>
@@ -210,19 +199,32 @@ namespace Impala
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            if (!DA.GetDataTree(0, out GH_Structure<GH_Point> points)) return;
-            if (!DA.GetDataTree(1, out GH_Structure<GH_Curve> curves)) return;
-            if (!DA.GetDataTree(2, out GH_Structure<GH_Number> tols)) return;
+            errnum = 0; 
+            if (!DA.GetDataTree(0, out GH_Structure<IGH_Goo> points)) return;
+            if (!DA.GetDataTree(1, out GH_Structure<IGH_Goo> curves)) return;
+            if (!DA.GetDataTree(2, out GH_Structure<IGH_Goo> tols)) return;
+
+            if (tols.DataCount == 0)
+            {
+                tols = new GH_Structure<IGH_Goo>();
+                tols.Append(new GH_Number(double.MaxValue));
+            }
 
             //Cast in
-            GH_Structure<IGH_Goo>[] inputs = new GH_Structure<IGH_Goo>[] { points.DuplicateCast(PointToGoo), curves.DuplicateCast(CurveToGoo), tols.DuplicateCast(NumToGoo) };
+            GH_Structure<IGH_Goo>[] inputs = new GH_Structure<IGH_Goo>[] { points,curves,tols };
             //Operate
             GH_Structure<IGH_Goo>[] results = ZipMaxN(inputs, CurveCP, CheckError, 3);
 
+            if (errnum > 0)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to convert input types. Emitting null.");
+                return;
+            }
+
             //Cast out
-            DA.SetDataTree(0,results[0].DuplicateCast(GooToPoint));
-            DA.SetDataTree(1,results[1].DuplicateCast(GooToNumber));
-            DA.SetDataTree(2,results[2].DuplicateCast(GooToBool));
+            DA.SetDataTree(0,results[0]);
+            DA.SetDataTree(1,results[1]);
+            DA.SetDataTree(2,results[2]);
         }
         /// <summary>
         /// Provides an Icon for the component.
@@ -233,7 +235,8 @@ namespace Impala
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Impala.Properties.Resources.parccp;
+                //return Impala.Properties.Resources.parccp;
+                return null;
             }
         }
 
@@ -245,6 +248,6 @@ namespace Impala
             get { return new Guid("5AEA824F-3B81-490B-B9C4-F2BDB1B4B451"); }
         }
     }
-
+    */
  
 }
