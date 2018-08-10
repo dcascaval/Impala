@@ -1,0 +1,6 @@
+public static (GH_Structure<A>,GH_Structure<B>,GH_Structure<C>,GH_Structure<D>)Zip2Red1x4<A,B,C,D>()
+    where T : IGH_Goo where Q : IGH_Goo where R : IGH_Goo
+    where A : IGH_Goo where B : IGH_Goo where C : IGH_Goo where D : IGH_Goo
+{
+    return (null, null, null, null);
+}
