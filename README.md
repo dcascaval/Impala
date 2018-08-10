@@ -32,7 +32,8 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 #### Benchmarks
 
 - Current benchmarks are available in `/bench`, and are generated primarily using `bencher.gh`. Standalone benchmark files are also used to test for correctness - a typical benchmark will verify correctness and measure performance against the equivalent native implementation to the Impala functionality. For example, a section of the QuickMath benchmark might look like this:
-![alt-text](`./QuicMath_Demo.png`)
+
+!["alt-text"](QuicMath_Demo.png)
 
 ---	
 #### Moving Forward
