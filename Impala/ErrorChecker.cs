@@ -54,9 +54,9 @@ namespace Impala
 
     public class Error<T>
     {
-        Func<T, bool> check;
-        Action<GH_Component> handle;
-        GH_Component comp;
+        private readonly Func<T, bool> check;
+        private readonly Action<GH_Component> handle;
+        private readonly GH_Component comp;
 
         public Error(Func<T, bool> check, Action<GH_Component> handle, GH_Component comp)
         {
