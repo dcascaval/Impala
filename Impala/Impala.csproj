@@ -64,6 +64,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Benchmarker.cs" />
     <Compile Include="ErrorChecker.cs" />
     <Compile Include="Generated.cs" />
     <Compile Include="Generic.cs" />

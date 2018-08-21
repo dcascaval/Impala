@@ -35,6 +35,33 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 
 !["alt-text"](QuicMath_Demo.png)
 
+---
+#### Development Milestones (v1.0)
+
+- Generate Methods for ZipRedux functions
+- Generate Methods for ZipGraft functions
+- Closest Point functions (Brep, Mesh)
+- Containment functions (PointInBrep, PointInCurve, PointOnSurface)
+- Intersection functions (BLX, CCX, MCX)
+- Raycasting functions (ParMeshRay, ParBrepRay)
+- Transform functions (BoxMorph, SrfMorph)
+- Functional extensisons (Halton, MeshFlow)
+- Benchmarking components (SumGroup, SumInputs)
+- Testing
+- Documentation
+- Benchmarking
+
+---
+
+#### Propsed Extensions (v2.0)
+
+- ZUI options
+- Dynamic lambda components and branch-matching
+- Test Span<T> and ImpalaStructure<T> : IGH_Structure for copying output
+- Profile portions and cache repeat expensive computation
+- Implement granularity control across the board, dynamically tune to system
+- Offsetting, Booleans, Meshfilling algorithms
+
 ---	
 #### Moving Forward
 
