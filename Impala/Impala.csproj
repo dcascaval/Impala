@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ErrorChecker.cs" />
+    <Compile Include="Generated.cs" />
     <Compile Include="Generic.cs" />
     <Compile Include="ImpalaComponent.cs" />
     <Compile Include="ImpalaInfo.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="QuickMultiply.cs" />
     <Compile Include="QuickNeg.cs" />
     <Compile Include="QuickSubtract.cs" />
+    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
