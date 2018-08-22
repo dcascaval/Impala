@@ -45,16 +45,16 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 - Generate Methods for Zip functions (Done - 8/20)
 - Generate Methods for ZipRedux functions (Done - 8/21)
 - Generate Methods for ZipGraft functions (Done - 8/21)
-- Closest Point functions (Brep, Mesh)
+- Closest Point functions (Points, Curves, Brep, Mesh) (Done - 8/22)
 - Containment functions (PointInBrep, PointInCurve, PointOnSurface)
 - Intersection functions (BLX, CCX, MCX)
 - Raycasting functions (ParMeshRay, ParBrepRay)
 - Transform functions (BoxMorph, SrfMorph)
 - Functional extensisons (Halton, MeshFlow)
 - Benchmarking components (SumGroup, SumInputs) (Done - 8/21)
-- Testing
+- Testing (Ongoing)
 - Documentation
-- Benchmarking
+- Benchmarking (Ongoing)
 
 ---
 

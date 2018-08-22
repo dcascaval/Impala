@@ -65,38 +65,39 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Benchmarker.cs" />
+    <Compile Include="Components\ParBrepCP.cs" />
     <Compile Include="ErrorChecker.cs" />
     <Compile Include="Generated.cs" />
     <Compile Include="Generic.cs" />
     <Compile Include="ImpalaComponent.cs" />
     <Compile Include="ImpalaInfo.cs" />
     <Compile Include="ImpalaTest.cs" />
-    <Compile Include="ParDivideLength.cs" />
-    <Compile Include="ParMeshCP.cs" />
-    <Compile Include="ParMeshFlow.cs" />
-    <Compile Include="ParClosestCurveCP.cs" />
-    <Compile Include="ParCurveCP.cs" />
-    <Compile Include="ParPointCP.cs" />
+    <Compile Include="Components\ParDivideLength.cs" />
+    <Compile Include="Components\ParMeshCP.cs" />
+    <Compile Include="Components\ParMeshFlow.cs" />
+    <Compile Include="Components\ParClosestCurveCP.cs" />
+    <Compile Include="Components\ParCurveCP.cs" />
+    <Compile Include="Components\ParPointCP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="QuickAbs.cs" />
-    <Compile Include="QuickAdd.cs" />
-    <Compile Include="QuickAEQ.cs" />
-    <Compile Include="QuickAvg.cs" />
-    <Compile Include="QuickBounds.cs" />
-    <Compile Include="QuickDivide.cs" />
-    <Compile Include="QuickEq.cs" />
-    <Compile Include="QuickGT.cs" />
-    <Compile Include="QuickLT.cs" />
-    <Compile Include="QuickMath.cs" />
-    <Compile Include="QuickMod.cs" />
-    <Compile Include="QuickMultiply.cs" />
-    <Compile Include="QuickNeg.cs" />
-    <Compile Include="QuickSubtract.cs" />
+    <Compile Include="QuickMath\QuickAbs.cs" />
+    <Compile Include="QuickMath\QuickAdd.cs" />
+    <Compile Include="QuickMath\QuickAEQ.cs" />
+    <Compile Include="QuickMath\QuickAvg.cs" />
+    <Compile Include="QuickMath\QuickBounds.cs" />
+    <Compile Include="QuickMath\QuickDivide.cs" />
+    <Compile Include="QuickMath\QuickEq.cs" />
+    <Compile Include="QuickMath\QuickGT.cs" />
+    <Compile Include="QuickMath\QuickLT.cs" />
+    <Compile Include="QuickMath\QuickMath.cs" />
+    <Compile Include="QuickMath\QuickMod.cs" />
+    <Compile Include="QuickMath\QuickMultiply.cs" />
+    <Compile Include="QuickMath\QuickNeg.cs" />
+    <Compile Include="QuickMath\QuickSubtract.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>

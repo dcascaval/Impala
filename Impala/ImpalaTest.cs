@@ -8,7 +8,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 
-using static Impala.Generic;
+using static Impala.Generated;
 
 namespace Impala
 {
@@ -67,11 +67,12 @@ namespace Impala
             return (ptree, mTree, numTree);
         }
 
+        /*
         public static (ProfResult,ProfResult) Zip3xTests(int pb, int pc, int mb, int mc)
         {
             var (a, b, c) = Get3xTestTrees(pb,pc,mb,mc);
             var timer = Stopwatch.StartNew();
-            var t1 = ZipMaxTree3x3(a, b, c, ParMeshCP.MeshCP, new ParMeshCP().CheckError);
+            var t1 = Zip3x3(a, b, c, ParMeshCP.MeshCP, new ParMeshCP().CheckError);
             var r1 = new ProfResult((int) timer.ElapsedMilliseconds, t1.Item1.DataCount);
             timer = Stopwatch.StartNew();
             var t2 = ZipMaxTree3xN(a, b, c, ParMeshCPAuto.MeshCPAuto, new ParMeshCPAuto().CheckError, 3);
@@ -94,7 +95,7 @@ namespace Impala
             var r2 = new ProfResult((int)timer.ElapsedMilliseconds, t2.Count);
 
             return (r1, r2);
-        }
+        }*/
 
     }
 
@@ -148,11 +149,11 @@ namespace Impala
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
-            var(t1,t2) = ImpalaTest.Zip3xTests(1,12000,10,1);
+            //var(t1,t2) = ImpalaTest.Zip3xTests(1,12000,10,1);
             //var (t1, t2) = ImpalaTest.FlatCasterTest(120000);
             DA.SetData(0, new GH_String($"Run."));
-            DA.SetDataList(1, new List<GH_Integer>() { new GH_Integer(t1.ms), new GH_Integer(t2.ms)});
-            DA.SetDataList(2, new List<GH_Integer>() { new GH_Integer(t1.count), new GH_Integer(t2.count) });
+            //DA.SetDataList(1, new List<GH_Integer>() { new GH_Integer(t1.ms), new GH_Integer(t2.ms)});
+            //DA.SetDataList(2, new List<GH_Integer>() { new GH_Integer(t1.count), new GH_Integer(t2.count) });
         }
 
         /// <summary>

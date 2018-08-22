@@ -60,55 +60,7 @@ namespace Impala
 
         #endregion
 
-
         #region ZipFunctions
-        /// <summary>
-        /// Super-Generic N x M, Dual-Parallel zip. This is unfortunately half the speed of the manually defined zip.
-        /// </summary>
-        public static GH_Structure<IGH_Goo>[] ZipMaxN(GH_Structure<IGH_Goo>[] inputs, Func<IGH_Goo[],IGH_Goo[]> action, ErrorChecker<IGH_Goo[]> error, int output)
-        {
-            var opLen = Enumerable.Range(0, output);
-            GH_Structure<IGH_Goo>[] results = opLen.Select(_ => new GH_Structure<IGH_Goo>()).ToArray();
-            var maxbranch = inputs.Select(i => i.Branches.Count).Max();
-            var prePaths = GetPathList(inputs);
-            var paths = Enumerable.Range(0, maxbranch).Select(i => GetPath(prePaths, i)).ToArray();
-
-            for (int i = 0; i < maxbranch; i++) // Reverse this ?
-            {
-
-                for (int k = 0; k < output; k++)
-                {
-                    results[k].EnsurePath(paths[i]);
-                }
-            }
-
-            Parallel.For(0, maxbranch, i =>
-            {
-                var path = paths[i];
-                var branches = inputs.Select(inp => inp.Branches[Math.Min(i, inp.Branches.Count - 1)]);
-                var branchlens = branches.Select(br => br.Count);
-                if (branchlens.Min() > 0)
-                {
-                    var maxlen = branchlens.Max();
-                    var resultbranches = opLen.Select(_ => new IGH_Goo[maxlen]).ToArray();
-                    Parallel.For(0, maxlen, j =>
-                    {
-                        var args = (from br in branches select br[Math.Min(j, br.Count - 1)]).ToArray();
-                        IGH_Goo[] calc = error.Validate(args) ? action(args) : opLen.Select(_ => default(IGH_Goo)).ToArray();
-                        for (int k = 0; k < calc.Length; k++)   // K branches of J length each
-                        {
-                            resultbranches[k][j] = calc[k];
-                        }
-                    });
-                    for (int k = 0; k < resultbranches.Length; k++)
-                    {
-                        results[k].AppendRange(resultbranches[k], path);
-                    }
-                }
-            });
-
-            return results;
-        }
 
         /// <summary>
         /// Applies GH's default tree matching logic when applying an action that takes in two datatrees and outputs one.
@@ -147,178 +99,6 @@ namespace Impala
             return result;
         }
 
-        /// <summary>
-        /// Applies GH's default tree matching logic when applying an action that takes and outputs 3 datatrees. 
-        /// This is about the limit at which manually defining the structure is still viable.
-        /// Both levels (per-branch and per-list) are parallelised.
-        /// </summary>
-        public static (GH_Structure<A>, GH_Structure<B>, GH_Structure<C>) ZipMaxTree3x3<T, Q, R, A, B, C>(GH_Structure<T> a,
-            GH_Structure<Q> b, GH_Structure<R> c, Func<T, Q, R, (A, B, C)> action, ErrorChecker<(T, Q, R)> error)
-            where T : IGH_Goo where Q : IGH_Goo where R : IGH_Goo
-            where A : IGH_Goo where B : IGH_Goo where C : IGH_Goo
-        {
-
-            var result1 = new GH_Structure<A>();
-            var result2 = new GH_Structure<B>();
-            var result3 = new GH_Structure<C>();
-
-            var maxbranch = Math.Max(a.Branches.Count, b.Branches.Count);
-            var paths = GetPathList(a, b);
-
-            for (int i = 0; i < maxbranch; i++)
-            {
-                var targpath = GetPath(paths, i);
-                result1.EnsurePath(targpath);
-                result2.EnsurePath(targpath);
-                result3.EnsurePath(targpath);
-            }
-
-            //Dual nested Parallel Loops! Chunky. 
-            Parallel.For(0, maxbranch, i =>
-            {
-                var targpath = GetPath(paths, i);
-                var ba = a.Branches[Math.Min(i, a.Branches.Count - 1)];
-                var bb = b.Branches[Math.Min(i, b.Branches.Count - 1)];
-                var bc = c.Branches[Math.Min(i, c.Branches.Count - 1)];
-                if (ba.Count > 0 && bb.Count > 0 && bc.Count > 0)
-                {
-                    int maxlen = Math.Max(Math.Max(ba.Count, bb.Count), bc.Count);
-                    (A, B, C)[] temp = new(A, B, C)[maxlen];
-                    Parallel.For(0, maxlen, j =>
-                    {
-                        T ax = ba[Math.Min(ba.Count - 1, j)];
-                        Q bx = bb[Math.Min(bb.Count - 1, j)];
-                        R cx = bc[Math.Min(bc.Count - 1, j)];
-                        // Check and input
-                        temp[j] = error.Validate((ax, bx, cx)) ? action(ax, bx, cx) : default;
-                    });
-
-                    result1.AppendRange(from item in temp select item.Item1, targpath);
-                    result2.AppendRange(from item in temp select item.Item2, targpath);
-                    result3.AppendRange(from item in temp select item.Item3, targpath);
-                }
-            });
-
-            return (result1, result2, result3);
-        }
-
-
-        /// <summary>
-        /// Applies GH's default tree matching logic when applying an action that takes and outputs 3 datatrees. 
-        /// This is about the limit at which manually defining the structure is still viable.
-        /// Both levels (per-branch and per-list) are parallelised.
-        /// </summary>
-        public static (GH_Structure<A>, GH_Structure<B>, GH_Structure<C>) ZipGraft4x3<T, Q, R, S, A, B, C>(GH_Structure<T> a,
-            GH_Structure<Q> b, GH_Structure<R> c, GH_Structure<S> d, Func<T, Q, R, S, (A[], B[], C[])> action, ErrorChecker<(T, Q, R, S)> error)
-            where T : IGH_Goo where Q : IGH_Goo where R : IGH_Goo where S : IGH_Goo
-            where A : IGH_Goo where B : IGH_Goo where C : IGH_Goo
-        {
-
-            var result1 = new GH_Structure<A>();
-            var result2 = new GH_Structure<B>();
-            var result3 = new GH_Structure<C>();
-
-            var maxbranch = Math.Max(a.Branches.Count, b.Branches.Count);
-            var paths = GetPathList(a, b);
-
-            for (int i = 0; i < maxbranch; i++)
-            {
-                var path = GetPath(paths, i);
-                var ba = a.Branches[Math.Min(i, a.Branches.Count - 1)];
-                var bb = b.Branches[Math.Min(i, b.Branches.Count - 1)];
-                var bc = c.Branches[Math.Min(i, c.Branches.Count - 1)];
-                var bd = d.Branches[Math.Min(i, d.Branches.Count - 1)];
-                var maxlen = Max(ba.Count, bb.Count, bc.Count, bd.Count);
-                for (int j = 0; j < maxlen; j++)
-                {
-                    var targpath = path.AppendElement(j);
-                    result1.EnsurePath(targpath);
-                    result2.EnsurePath(targpath);
-                    result3.EnsurePath(targpath);
-                }
-            }
-
-            //Dual nested Parallel Loops! Chunky. 
-            Parallel.For(0, maxbranch, i =>
-            {
-                var path = GetPath(paths, i);
-                var ba = a.Branches[Math.Min(i, a.Branches.Count - 1)];
-                var bb = b.Branches[Math.Min(i, b.Branches.Count - 1)];
-                var bc = c.Branches[Math.Min(i, c.Branches.Count - 1)];
-                var bd = d.Branches[Math.Min(i, d.Branches.Count - 1)];
-                if (ba.Count > 0 && bb.Count > 0)
-                {
-                    var maxlen = Max(ba.Count, bb.Count, bc.Count, bd.Count);
-                    Parallel.For(0, maxlen, j =>
-                    { 
-                        T ax = ba[Math.Min(ba.Count - 1, j)];
-                        Q bx = bb[Math.Min(bb.Count - 1, j)];
-                        R cx = bc[Math.Min(bc.Count - 1, j)];
-                        S dx = bd[Math.Min(bd.Count - 1, j)];
-                        // Check and input
-                        var compute = error.Validate((ax, bx, cx, dx)) ? action(ax, bx, cx, dx) : (new A[0], new B[0], new C[0]);
-                        var targpath = path.AppendElement(j);
-                        result1.AppendRange(compute.Item1, targpath);
-                        result2.AppendRange(compute.Item2, targpath);
-                        result3.AppendRange(compute.Item3, targpath);
-                    });
-                }
-            });
-
-            return (result1, result2, result3);
-        }
-
-
-        public static (GH_Structure<A>,GH_Structure<B>, GH_Structure<C>,GH_Structure<D>) Zip2Red1x4<T,Q,R,A,B,C,D>
-           (GH_Structure<T> a, GH_Structure<Q> b, GH_Structure<R> redux, Func<T, Q, List<R>, (A, B, C, D)> action, ErrorChecker<(T, Q, List<R>)> error)
-            where T : IGH_Goo where Q : IGH_Goo where R : IGH_Goo
-            where A : IGH_Goo where B : IGH_Goo where C : IGH_Goo where D : IGH_Goo
-        {
-            var result1 = new GH_Structure<A>();
-            var result2 = new GH_Structure<B>();
-            var result3 = new GH_Structure<C>();
-            var result4 = new GH_Structure<D>();
-
-            var maxbranch = Max(a.Branches.Count, b.Branches.Count, redux.Branches.Count);
-            var paths = GetPathList(a, b);
-
-            for (int i = 0; i < maxbranch; i++)
-            {
-                var targpath = GetPath(paths, i);
-                result1.EnsurePath(targpath);
-                result2.EnsurePath(targpath);
-                result3.EnsurePath(targpath);
-                result4.EnsurePath(targpath);
-            }
-
-            //Dual nested Parallel Loops! Chunky. 
-            Parallel.For(0, maxbranch, i =>
-            {
-                var targpath = GetPath(paths, i);
-                var ba = a.Branches[Math.Min(i, a.Branches.Count - 1)];
-                var bb = b.Branches[Math.Min(i, b.Branches.Count - 1)];
-                var bc = redux.Branches[Math.Min(i, redux.Branches.Count - 1)];
-                if (ba.Count > 0 && bb.Count > 0 && bc.Count > 0)
-                {
-                    int maxlen = Math.Max(Math.Max(ba.Count, bb.Count), bc.Count);
-                    (A, B, C, D)[] temp = new(A, B, C, D)[maxlen];
-                    Parallel.For(0, maxlen, j =>
-                    {
-                        T ax = ba[Math.Min(ba.Count - 1, j)];
-                        Q bx = bb[Math.Min(bb.Count - 1, j)];
-                        // Check and input
-                        temp[j] = error.Validate((ax, bx, bc)) ? action(ax, bx, bc) : default;
-                    });
-
-                    result1.AppendRange(temp.Select(x=> x.Item1), targpath);
-                    result2.AppendRange(temp.Select(x=> x.Item2), targpath);
-                    result3.AppendRange(temp.Select(x=> x.Item3), targpath);
-                    result4.AppendRange(temp.Select(x=> x.Item4), targpath);
-                }
-            });
-
-            return (result1, result2, result3,result4);
-        }
 
 
         public static void DoEach<T>(this IEnumerable<T> collection, Action<T,int> action)
@@ -336,56 +116,6 @@ namespace Impala
             {
                 action(item);
             }
-        }
-
-
-        public static GH_Structure<IGH_Goo>[] ZipMaxTree3xN<T, Q, R>(GH_Structure<T> a, GH_Structure<Q> b, GH_Structure<R> c, 
-                                                       Func<T, Q, R, IGH_Goo[]> action, ErrorChecker<(T, Q, R)> error, int n)
-            where T : IGH_Goo where Q : IGH_Goo where R : IGH_Goo
-        {
-            var opLen = Enumerable.Range(0, n);
-            var result = opLen.Select(_ => new GH_Structure<IGH_Goo>()).ToArray();
-
-            var maxbranch = Math.Max(a.Branches.Count, b.Branches.Count);
-            var paths = GetPathList(a, b);
-
-            for (int i = 0; i < maxbranch; i++)
-            {
-                var targpath = GetPath(paths, i);
-                opLen.DoEach(j => result[j].EnsurePath(targpath));
-            }
-
-            //Dual nested Parallel Loops! Chunky. 
-            Parallel.For(0, maxbranch, i =>
-            {
-                var targpath = GetPath(paths, i);
-                var ba = a.Branches[Math.Min(i, a.Branches.Count - 1)];
-                var bb = b.Branches[Math.Min(i, b.Branches.Count - 1)];
-                var bc = c.Branches[Math.Min(i, c.Branches.Count - 1)];
-                if (ba.Count > 0 && bb.Count > 0 && bc.Count > 0)
-                {
-                    int maxlen = Math.Max(Math.Max(ba.Count, bb.Count), bc.Count);
-                    var resultbranches = opLen.Select(_ => new IGH_Goo[maxlen]).ToArray();
-                    Parallel.For(0, maxlen, j =>
-                    {
-                        T ax = ba[Math.Min(ba.Count - 1, j)];
-                        Q bx = bb[Math.Min(bb.Count - 1, j)];
-                        R cx = bc[Math.Min(bc.Count - 1, j)];
-                        // Check and input
-                        IGH_Goo[] calc = error.Validate((ax, bx, cx)) ? action(ax, bx, cx) : default;
-                        for (int k = 0; k < calc.Length; k++)   // K branches of J length each
-                        {
-                            resultbranches[k][j] = calc[k];
-                        }
-                    });
-                    for (int k = 0; k < n; k++)
-                    {
-                        result[k].AppendRange(resultbranches[k],targpath);
-                    }
-                }
-            });
-
-            return result;
         }
 
 
@@ -427,7 +157,6 @@ namespace Impala
 
         #endregion
 
-
         #region SequentialBasic
         /// <summary>
         /// Applies standard functional zip to GH_Structure types, trimming unused elements.
@@ -462,6 +191,44 @@ namespace Impala
             }
             return result;
         }
+
+        
+        /// <summary>
+        /// Grafts a standard list into a tree.
+        /// </summary>
+        public static GH_Structure<T> GraftList<T>(IEnumerable<T> source)
+            where T : IGH_Goo
+        {
+            var result = new GH_Structure<T>();
+            int i = 0;
+            foreach(var item in source)
+            {
+                result.Append(item, new GH_Path(i));
+                i++;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Grafts a standard tree.
+        /// </summary>
+        public static GH_Structure<T> GraftStructure<T>(this GH_Structure<T> source)
+            where T : IGH_Goo 
+        {
+            var result = new GH_Structure<T>();
+            for(int i = 0; i < source.Branches.Count; i++)
+            {
+                var path = source.Paths[i];
+                var branch = source.Branches[i];
+                for(int j = 0; j < branch.Count; j++)
+                {
+                    result.Append(branch[j], path.AppendElement(j));
+                }
+            }
+            return result;
+        }
+
+
 
         #endregion
 

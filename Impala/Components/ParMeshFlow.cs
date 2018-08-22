@@ -44,16 +44,16 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// This method works on list-inputs and uses a special-case caching optimisation. As a result the looping logic is explicitly defined.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<GH_Point> ptList = new List<GH_Point>();
-            List<GH_Mesh> meshList = new List<GH_Mesh>();
-            List<GH_Number> tolList = new List<GH_Number>();
-            List<GH_Integer> stepList = new List<GH_Integer>();
-            List<GH_Vector> flowDirList = new List<GH_Vector>();
+            var ptList = new List<GH_Point>();
+            var meshList = new List<GH_Mesh>();
+            var tolList = new List<GH_Number>();
+            var stepList = new List<GH_Integer>();
+            var flowDirList = new List<GH_Vector>();
 
             if (!DA.GetDataList("Start Points", ptList)) return;
             if (!DA.GetDataList("Mesh", meshList)) return;
@@ -80,15 +80,13 @@ namespace Impala
 
             if (ptList.Count > 1 && meshList.Count == 1 && tolList.Count == 1 && flowDirList.Count == 1 && stepList.Count <= ptList.Count)
             {
-                if (meshTolVecErrorCheck(meshList[0], tolList[0], flowDirList[0]))
+                if (MeshTolVecErrorCheck(meshList[0], tolList[0], flowDirList[0]))
                 {
                     Vector3d flowDir = flowDirList[0].Value;
                     Mesh mesh = meshList[0].Value;
                     double tol = tolList[0].Value;
 
-
-
-                    Transform xform = getReorientation(flowDir);
+                    Transform xform = GetReorientation(flowDir);
                     xform.TryGetInverse(out Transform inverseXform);
                     Mesh tMesh = mesh.DuplicateMesh();
                     tMesh.Transform(xform);
@@ -96,14 +94,14 @@ namespace Impala
                     Parallel.For(0, ptList.Count, i =>
                     {
                         int sidx = Math.Min(i, stepList.Count - 1);
-                        if (pointStepErrorCheck(ptList[i], stepList[sidx]))
+                        if (PointStepErrorCheck(ptList[i], stepList[sidx]))
                         {
                             Point3d pt = ptList[i].Value; //make accessible to steplist?
                             pt.Transform(xform);
                             int steps = stepList[sidx].Value;
 
-                            List<Point3d> polyList = MeshFlow(pt, tMesh, tol, steps);
-                            PolylineCurve poly = new PolylineCurve(polyList);
+                            var polyList = MeshFlow(pt, tMesh, tol, steps);
+                            var poly = new PolylineCurve(polyList);
                             poly.Transform(inverseXform); //why is this not
                             polyFlows[i] = new GH_Curve(poly);
                             polyLength[i] = new GH_Number(poly.GetLength());
@@ -124,7 +122,7 @@ namespace Impala
                     int sidx = Math.Min(i, stepList.Count - 1);
                     int fidx = Math.Min(i, flowDirList.Count - 1);
 
-                    if (fullErrorCheck(ptList[pidx], meshList[midx], tolList[tidx], stepList[sidx], flowDirList[fidx]))
+                    if (FullErrorCheck(ptList[pidx], meshList[midx], tolList[tidx], stepList[sidx], flowDirList[fidx]))
                     {
                         Point3d pt = ptList[pidx].Value;
                         Mesh mesh = meshList[midx].Value;
@@ -132,7 +130,7 @@ namespace Impala
                         int steps = stepList[sidx].Value;
                         Vector3d flowDir = flowDirList[fidx].Value;
 
-                        Transform xform = getReorientation(flowDir);
+                        Transform xform = GetReorientation(flowDir);
                         xform.TryGetInverse(out Transform inverseXform); //rotations are always invertible
 
                         Mesh tMesh = new Mesh();
@@ -201,7 +199,7 @@ namespace Impala
         }
 
         //Get the transformation by rotating the entire thing around the origin. Location doesn't matter since we'll be reorienting.
-        Transform getReorientation(Vector3d dest)
+        Transform GetReorientation(Vector3d dest)
         {
             if (dest.EpsilonEquals(-Vector3d.ZAxis, 1e-6))
             {
@@ -213,15 +211,15 @@ namespace Impala
         }
 
         /** Error Checking Area - Provide as many informative runtime messages as possible. */
-        bool fullErrorCheck(GH_Point pt, GH_Mesh msh, GH_Number tol, GH_Integer step, GH_Vector vec)
+        bool FullErrorCheck(GH_Point pt, GH_Mesh msh, GH_Number tol, GH_Integer step, GH_Vector vec)
         {
             bool flag = true;
-            flag = flag && meshTolVecErrorCheck(msh, tol, vec);
-            flag = flag && pointStepErrorCheck(pt, step);
+            flag = flag && MeshTolVecErrorCheck(msh, tol, vec);
+            flag = flag && PointStepErrorCheck(pt, step);
             return flag;
         }
 
-        bool meshTolVecErrorCheck(GH_Mesh msh, GH_Number tol, GH_Vector vec)
+        bool MeshTolVecErrorCheck(GH_Mesh msh, GH_Number tol, GH_Vector vec)
         {
             bool flag = true;
             if (msh == null || tol == null || vec == null)
@@ -248,7 +246,7 @@ namespace Impala
         }
 
   
-        bool pointStepErrorCheck(GH_Point pt, GH_Integer step)
+        bool PointStepErrorCheck(GH_Point pt, GH_Integer step)
         {
             bool flag = true; 
             if (pt == null || step == null)

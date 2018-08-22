@@ -109,18 +109,17 @@ namespace ImpalaMethodGenerator
         public static void GenerateZipReduxes()
         {
 
-            for (int i = 1; i < MaxZipInput; i++)
+            for (int zips = 1; zips < MaxZipInput; zips++)
             {
-                for (int j = 1; j < MaxZipOutput; j++)
+                for (int outs = 1; outs < MaxZipOutput; outs++)
                 {
-                    var zips = i;
-                    var redx = MaxZipInput - i; 
-                    var outs = j;
-
-                    PrintEmptyLines(2);
-                    var result = GenZipRedxFunction(zips, redx, outs);
-                    PrintLines(result);
-                    PrintEmptyLines(2);
+                    for (int redx = 1; redx + zips < MaxZipInput; redx++)
+                    {
+                        PrintEmptyLines(2);
+                        var result = GenZipRedxFunction(zips, redx, outs);
+                        PrintLines(result);
+                        PrintEmptyLines(2);
+                    }
                 }
             }
         }

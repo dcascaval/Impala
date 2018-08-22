@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Rhino.Geometry;
 
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
@@ -20,6 +21,38 @@ namespace Impala
         public static int Min(params int[] nums)
         {
             return nums.Min();
+        }
+
+        public static IEnumerable<int> IRange(int start, int end)
+        {
+            return Enumerable.Range(start, end - start);
+        }
+
+        public static IEnumerable<Q> SelEach<T, Q>(this IEnumerable<T> collection, Func<T, int, Q> action)
+        {
+            int i = 0;
+            var result = new List<Q>();
+            foreach (var item in collection)
+            {
+                result.Add(action(item, i));
+                i++;
+            }
+            return result;
+        }
+
+        public static double[] PtToArray(GH_Point ghpt)
+        {
+            return PtToArray(ghpt.Value);
+        }
+
+        public static double[] PtToArray(Point3d pt)
+        {
+            return new double[] { pt.X, pt.Y, pt.Z };
+        }
+
+        public static Point3d PtFromArray(double[] array)
+        {
+            return new Point3d(array[0], array[1], array[2]);
         }
 
         #region PathTools
