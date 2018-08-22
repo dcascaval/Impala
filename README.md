@@ -40,7 +40,7 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 
 - Preliminary benchmarks indicate that Impala components are as fast as native GH for all input sizes, and significantly faster for any larger input size. Additionally, Impala components are as fast or faster than the multithreaded GH components in GH1. Unlike those components, however, Impala components are optimised against adversarial input patterns, and can significantly outperform the multithreaded GH1 components in many cases:
 
-!["Parallel BLX component benchmark"](parbenchmark.png)
+!["Parallel BLX component benchmark"](parbenchmark.PNG)
 
 ---
 #### Development Milestones (v1.0)
