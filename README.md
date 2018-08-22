@@ -36,7 +36,11 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 
 - Current benchmarks are available in `/bench`, and are generated primarily using `bencher.gh`. Standalone benchmark files are also used to test for correctness - a typical benchmark will verify correctness and measure performance against the equivalent native implementation to the Impala functionality. For example, a section of the QuickMath benchmark might look like this:
 
-!["alt-text"](QuicMath_Demo.png)
+!["QuickMath speedtest benchmark, Arithmetic components"](QuicMath_Demo.png)
+
+- Preliminary benchmarks indicate that Impala components are as fast as native GH for all input sizes, and significantly faster for any larger input size. Additionally, Impala components are as fast or faster than the multithreaded GH components in GH1. Unlike those components, however, Impala components are optimised against adversarial input patterns, and can significantly outperform the multithreaded GH1 components in many cases:
+
+!["Parallel BLX component benchmark"](parbenchmark.png)
 
 ---
 #### Development Milestones (v1.0)
@@ -46,7 +50,7 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 - Generate Methods for ZipRedux functions (Done - 8/21)
 - Generate Methods for ZipGraft functions (Done - 8/21)
 - Closest Point functions (Points, Curves, Brep, Mesh) (Done - 8/22)
-- Containment functions (PointInBrep, PointInCurve, PointOnSurface)
+- Containment functions (PointInBrep, PointInMesh, PointInCurve)
 - Intersection functions (BLX, CCX, MCX)
 - Raycasting functions (ParMeshRay, ParBrepRay)
 - Transform functions (BoxMorph, SrfMorph)

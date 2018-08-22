@@ -40,6 +40,11 @@ namespace Impala
             return result;
         }
 
+        public static T[] Array<T>(params T[] items)
+        {
+            return items;
+        }
+
         public static double[] PtToArray(GH_Point ghpt)
         {
             return PtToArray(ghpt.Value);

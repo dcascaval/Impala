@@ -17,7 +17,7 @@ namespace Impala
     public class ParDivideLength : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the MyComponent1 class.
+        /// Initializes a new instance of the ParDivideLength class.
         /// </summary>
         public ParDivideLength()
           : base("ParDivideLength", "parDivLen",

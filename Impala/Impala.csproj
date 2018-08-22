@@ -65,7 +65,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Benchmarker.cs" />
+    <Compile Include="Components\ParBLX.cs" />
     <Compile Include="Components\ParBrepCP.cs" />
+    <Compile Include="Components\ParBrepInc.cs" />
+    <Compile Include="Components\ParCCX.cs" />
+    <Compile Include="Components\ParMCX.cs" />
+    <Compile Include="Components\ParMeshInc.cs" />
+    <Compile Include="Components\PointInCurve.cs" />
     <Compile Include="ErrorChecker.cs" />
     <Compile Include="Generated.cs" />
     <Compile Include="Generic.cs" />
@@ -111,25 +117,7 @@
     <None Include="Resources\impala_main.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\impala_ccp.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\imapala_ccp.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\parccp.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\qadd.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\qdiv.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\qmult.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\qsub.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\blank.png" />
