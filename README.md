@@ -15,6 +15,9 @@ Impala focuses primarily on replicating existing Grasshopper functionality and d
 
 Additionally, performance is improved relative to native GH by exposing "threshold" parameters wherever possible - allowing the user to specify under which conditions they do not want the result of an operation, significantly speeding up the computation in these cases.
 	
+
+**Impala is not yet fully tested or ready for release. See Development Milestone (v1.0) for current progress.**
+
 --- 
 #### Architecture
 
@@ -38,15 +41,17 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 ---
 #### Development Milestones (v1.0)
 
-- Generate Methods for ZipRedux functions
-- Generate Methods for ZipGraft functions
+- Curve Divisions and ZipGrafts (Done - 8/20)
+- Generate Methods for Zip functions (Done - 8/20)
+- Generate Methods for ZipRedux functions (Done - 8/21)
+- Generate Methods for ZipGraft functions (Done - 8/21)
 - Closest Point functions (Brep, Mesh)
 - Containment functions (PointInBrep, PointInCurve, PointOnSurface)
 - Intersection functions (BLX, CCX, MCX)
 - Raycasting functions (ParMeshRay, ParBrepRay)
 - Transform functions (BoxMorph, SrfMorph)
 - Functional extensisons (Halton, MeshFlow)
-- Benchmarking components (SumGroup, SumInputs)
+- Benchmarking components (SumGroup, SumInputs) (Done - 8/21)
 - Testing
 - Documentation
 - Benchmarking
@@ -57,7 +62,7 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 
 - ZUI options
 - Dynamic lambda components and branch-matching
-- Test Span<T> and ImpalaStructure<T> : IGH_Structure for copying output
+- Test Span<T> and ImpalaStructure<T> : IGH_Structure for memory-efficient copy output
 - Profile portions and cache repeat expensive computation
 - Implement granularity control across the board, dynamically tune to system
 - Offsetting, Booleans, Meshfilling algorithms
