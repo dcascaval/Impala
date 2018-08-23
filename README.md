@@ -53,7 +53,7 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 - Containment functions (PointInBrep, PointInMesh, PointInCurve) (Done - 8/22)
     - Multiple Containments
 - Intersection functions (BLX, CCX, MCX) (Done - 8/22)
-- Raycasting functions (ParMeshRay, Isovists)
+- Raycasting functions (ParMeshRay, Iso2D, Iso3D) (Done - 8/23)
 - Transform functions (BoxMorph, SrfMorph) (Done - 8/23)
 - Functional extensisons (Halton, MeshFlow, VisCen)
 - Benchmarking components (SumGroup, SumInputs) (Done - 8/21)
