@@ -40,7 +40,7 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 
 - Preliminary benchmarks indicate that Impala components are as fast as native GH for all input sizes, and significantly faster for any larger input size. Additionally, Impala components are as fast or faster than the multithreaded GH components in GH1. Unlike those components, however, Impala components are optimised against adversarial input patterns, and can significantly outperform the multithreaded GH1 components in many cases:
 
-!["Parallel BLX component benchmark"](parbenchmark.PNG)
+!["Parallel BLX component benchmark"](parbenchmark.png)
 
 ---
 #### Development Milestones (v1.0)
@@ -50,11 +50,12 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 - Generate Methods for ZipRedux functions (Done - 8/21)
 - Generate Methods for ZipGraft functions (Done - 8/21)
 - Closest Point functions (Points, Curves, Brep, Mesh) (Done - 8/22)
-- Containment functions (PointInBrep, PointInMesh, PointInCurve)
-- Intersection functions (BLX, CCX, MCX)
-- Raycasting functions (ParMeshRay, ParBrepRay)
+- Containment functions (PointInBrep, PointInMesh, PointInCurve) (Done - 8/22)
+    - Multiple Containments
+- Intersection functions (BLX, CCX, MCX) (Done - 8/22)
+- Raycasting functions (ParMeshRay, Isovists)
 - Transform functions (BoxMorph, SrfMorph)
-- Functional extensisons (Halton, MeshFlow)
+- Functional extensisons (Halton, MeshFlow, Viscen)
 - Benchmarking components (SumGroup, SumInputs) (Done - 8/21)
 - Testing (Ongoing)
 - Documentation

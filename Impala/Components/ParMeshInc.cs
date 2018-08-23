@@ -21,7 +21,7 @@ namespace Impala
         public ParMeshInc()
           : base("ParMeshInc", "ParMeshInc",
               "Test whether a point is inside a closed mesh.",
-              "Impala", "Physical")
+              "Impala", "Containment")
         {
             var error = new Error<(GH_Mesh, GH_Point, GH_Boolean)>(NullCheck, NullHandle, this);
             CheckError = new ErrorChecker<(GH_Mesh, GH_Point, GH_Boolean)>(error);

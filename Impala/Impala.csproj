@@ -62,15 +62,20 @@
       <HintPath>C:\Users\Dan\AppData\Roaming\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.76.0\GH_IO.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Transform">
+      <HintPath>..\..\..\..\AppData\Roaming\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.76.0\Components\Transform.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Benchmarker.cs" />
     <Compile Include="Components\ParBLX.cs" />
+    <Compile Include="Components\ParBoxMorph.cs" />
     <Compile Include="Components\ParBrepCP.cs" />
     <Compile Include="Components\ParBrepInc.cs" />
     <Compile Include="Components\ParCCX.cs" />
     <Compile Include="Components\ParMCX.cs" />
     <Compile Include="Components\ParMeshInc.cs" />
+    <Compile Include="Components\ParMeshRay.cs" />
     <Compile Include="Components\PointInCurve.cs" />
     <Compile Include="ErrorChecker.cs" />
     <Compile Include="Generated.cs" />

@@ -16,7 +16,7 @@ namespace Impala
         public ParMeshFlow()
           : base("ParMeshFlow", "parMeshFlow",
               "Find flow lines along a mesh according to a gravitational vector",
-              "Impala", "Physical")
+              "Impala", "Extensions")
         {
         }
 

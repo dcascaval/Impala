@@ -24,7 +24,7 @@ namespace Impala
         public ParBLX()
           : base("ParBrepLineIntersect", "ParBLX",
               "Test whether a line and brep intersect.",
-              "Impala", "Physical")
+              "Impala", "Intersection")
         {
             var error = new Error<(GH_Brep, GH_Line)>(NullCheck, NullHandle, this);
             CheckError = new ErrorChecker<(GH_Brep, GH_Line)>(error);

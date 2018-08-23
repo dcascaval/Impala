@@ -23,7 +23,7 @@ namespace Impala
         public ParCCX()
           : base("ParCurveCurveIntersect", "ParCCX",
               "Test whether a pair of curves intersect.",
-              "Impala", "Physical")
+              "Impala", "Intersection")
         {
             var error = new Error<(GH_Curve, GH_Curve)>(NullCheck, NullHandle, this);
             CheckError = new ErrorChecker<(GH_Curve, GH_Curve)>(error);

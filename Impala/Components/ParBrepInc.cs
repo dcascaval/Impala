@@ -21,7 +21,7 @@ namespace Impala
         public ParBrepInc()
           : base("ParBrepInc", "ParBrepInc",
               "Test whether a point is inside a closed brep.",
-              "Impala", "Physical")
+              "Impala", "Containment")
         {
             var error = new Error<(GH_Brep, GH_Point, GH_Boolean)>(NullCheck, NullHandle, this);
             CheckError = new ErrorChecker<(GH_Brep, GH_Point, GH_Boolean)>(error);

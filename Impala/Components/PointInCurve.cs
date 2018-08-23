@@ -22,7 +22,7 @@ namespace Impala
         public ParPointInCurve()
           : base("ParPointInCurve", "ParPtinCrv",
               "Test whether a point is inside a closed curve.",
-              "Impala", "Physical")
+              "Impala", "Containment")
         {
             var error = new Error<(GH_Curve, GH_Point, GH_Plane, GH_Boolean)>(NullCheck, NullHandle, this);
             CheckError = new ErrorChecker<(GH_Curve, GH_Point, GH_Plane, GH_Boolean)>(error);

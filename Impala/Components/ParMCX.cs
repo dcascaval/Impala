@@ -23,7 +23,7 @@ namespace Impala
         public ParMCX()
           : base("ParMeshCurveIntersect", "ParMCX",
               "Test whether a mesh and a curve intersect.",
-              "Impala", "Physical")
+              "Impala", "Intersection")
         {
             var error = new Error<(GH_Mesh, GH_Curve)>(NullCheck, NullHandle, this);
             CheckError = new ErrorChecker<(GH_Mesh, GH_Curve)>(error);
