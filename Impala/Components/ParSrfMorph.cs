@@ -87,7 +87,7 @@ namespace Impala
             if (!DA.GetDataTree(4, out GH_Structure<GH_Interval> vtree)) return;
             if (!DA.GetDataTree(5, out GH_Structure<GH_Interval> wtree)) return;
             
-            var gx = Zip6x1(geoTree, refTree, targTree,utree,vtree,wtree,SrfMorpher, CheckError);
+            var gx = Zip6x1(geoTree, refTree, targTree,utree,vtree,wtree,SrfMorpher,CheckError);
 
             DA.SetDataTree(0, gx);
         }

@@ -25,12 +25,12 @@ namespace Impala
               "Shoot a ring of rays at a set of obstacles.",
               "Impala", "Intersection")
         {
-            var error = new Error<(GH_Mesh, GH_Point, GH_Vector)>(NullCheck, NullHandle, this);
-            CheckError = new ErrorChecker<(GH_Mesh, GH_Point, GH_Vector)>(error);
+            //var error = new Error<(GH_Mesh, GH_Point, GH_Vector)>(NullCheck, NullHandle, this);
+            //CheckError = new ErrorChecker<(GH_Mesh, GH_Point, GH_Vector)>(error);
         }
 
-        public ErrorChecker<(GH_Mesh, GH_Point, GH_Vector)> CheckError;
-        static Func<(GH_Mesh, GH_Point, GH_Vector), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+        //public ErrorChecker<(GH_Mesh, GH_Point, GH_Vector)> CheckError;
+        //static Func<(GH_Mesh, GH_Point, GH_Vector), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
 
 
         /// <summary>
@@ -44,7 +44,6 @@ namespace Impala
             pManager.AddMeshParameter("Obstacles", "O", "Obstacles in sampling", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "P", "Sampling plane. XY is used by default.", GH_ParamAccess.item, Plane.WorldXY);
             pManager.AddIntervalParameter("Interval", "I", "Sampling interval, starting at X axis moving CCW", GH_ParamAccess.item, new Interval(0, Math.PI * 2));
-            //Domain parameter?
         }
 
         /// <summary>
@@ -65,23 +64,66 @@ namespace Impala
         public static (GH_Point[], GH_Integer[], GH_Boolean[]) SolveIso2D(GH_Point gpt, GH_Plane gpl, GH_Integer gnum, GH_Number grad, GH_Interval gint, List<GH_Mesh> gobs)
         {
             var meshes = gobs.Select(ob => ob.Value).ToArray();
+            var sampleCenter = gpt.Value;
             var plane = gpl.Value;
+            var radius = grad.Value;
             var sintv = gint.Value;
             double samples = gnum.Value;
+
             var ixpts = meshes.SelectMany(m => Intersection.MeshPlane(m, plane).SelectMany(ToPoints));
-            var smpt = new List<Point3d>();
-            for (int i = 0; i < gnum.Value; i++)
+            var smpt = IRange(0, gnum.Value).Select(i =>
+             {
+                 Vector3d baseVec = new Vector3d(plane.XAxis);
+                 baseVec.Rotate(sintv.T0 + (sintv.Length) * i / samples, plane.ZAxis);
+                 return (sampleCenter + baseVec);
+             }).ToList();
+            smpt.AddRange(ixpts);
+            var circ = new Circle(plane, radius);
+            var cptx = smpt.Select(p => { circ.ClosestParameter(p, out double t); return (p,t); });
+            var sortVecs = cptx.OrderBy(pair => pair.t).Select(pair => {
+                var amp = pair.p - sampleCenter;
+                amp.Unitize();
+                return new Ray3d(sampleCenter, amp);
+                }).ToArray();
+
+            var ptResults = new GH_Point[sortVecs.Length];
+            var iResults = new GH_Integer[sortVecs.Length];
+            var ixResults = new GH_Boolean[sortVecs.Length];
+
+            Parallel.For(0, sortVecs.Length, j =>
             {
-                Vector3d baseVec = new Vector3d(plane.XAxis);
-                baseVec.Rotate(sintv.T0 + (sintv.Length)*i/samples,plane.ZAxis);
+                var jRay = sortVecs[j];
 
-            }
+                double bestIx = -1.0;
+                int bestIdx = -1;
+                for(int k = 0; k < meshes.Length; k++)
+                {
+                    var ix = Intersection.MeshRay(meshes[k], jRay);
+                    if (ix < 0.0) continue;
+                    else if (bestIx < 0.0 || ix < bestIx)
+                    {
+                        bestIx = ix;
+                        bestIdx = k;
+                    }
+                }
+                if (bestIx < 0.0) //failure, use radius
+                {
+                    ptResults[j] = new GH_Point(jRay.Position + jRay.Direction * radius);
+                    iResults[j] = new GH_Integer(-1);
+                    ixResults[j] = new GH_Boolean(false);
+                }
+                else
+                {
+                    //Cap radius
+                    var pt2 = jRay.PointAt(bestIx);
+                    if (pt2.DistanceTo(sampleCenter) > radius) pt2 = jRay.Position + jRay.Direction * radius;
+                    ptResults[j] = new GH_Point(pt2);
+                    iResults[j] = new GH_Integer(bestIdx);
+                    ixResults[j] = new GH_Boolean(true);
+                }
+            });
 
-            Ray3d ray = new Ray3d(gpt.Value, gdir.Value);
-            var ix = Intersection.MeshRay(m, ray, out int[] faceIndices);
-            if (ix < 0.0) return (null, null, new GH_Boolean(false));
-            var pt = new GH_Point(ray.PointAt(ix));
-            return (pt, new GH_Integer(faceIndices[0]), new GH_Boolean(true));
+            return (ptResults, iResults, ixResults);
         }
 
         /// <summary>
@@ -104,6 +146,8 @@ namespace Impala
             if (!DA.GetData(4, ref plane)) return;
             if (!DA.GetData(5, ref range)) return;
 
+            //This requires a Zip5Red1xGraft3();
+
             if (obstacles.Count == 0)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No obstacles!");
@@ -122,10 +166,10 @@ namespace Impala
                 return;
             }
 
-            
-            DA.SetDataTree(0, ptx);
-            DA.SetDataTree(1, idx);
-            DA.SetDataTree(2, ix);
+            var (pt, idx, ix) = SolveIso2D(samplePt, plane, numSamples, radius, range, obstacles);
+            DA.SetDataList(0, pt);
+            DA.SetDataList(1, idx);
+            DA.SetDataList(2, ix);
         }
 
         /// <summary>

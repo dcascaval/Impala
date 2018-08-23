@@ -2738,5 +2738,54 @@ namespace Impala
         }
         
         
+        
+        
+        public static GH_Structure<A>Zip6x1<T,Q,R,P,U,V,A>
+        (GH_Structure<T> zip_t, GH_Structure<Q> zip_q, GH_Structure<R> zip_r, GH_Structure<P> zip_p, GH_Structure<U> zip_u, GH_Structure<V> zip_v, Func<T,Q,R,P,U,V,A> action, ErrorChecker<(T, Q, R, P, U, V)> error)
+            where T : IGH_Goo where Q : IGH_Goo where R : IGH_Goo where P : IGH_Goo where U : IGH_Goo where V : IGH_Goo
+            where A : IGH_Goo
+        {
+            var result1 = new GH_Structure<A>();
+            
+            var maxbranch = Max(zip_t.Branches.Count, zip_q.Branches.Count, zip_r.Branches.Count, zip_p.Branches.Count, zip_u.Branches.Count, zip_v.Branches.Count);
+            var paths = GetPathList(zip_t, zip_q, zip_r, zip_p, zip_u, zip_v);
+            
+            for (int i = 0; i < maxbranch; i++)
+            {
+                var targpath = GetPath(paths,i);
+                result1.EnsurePath(targpath);
+            }
+            
+            Parallel.For(0,maxbranch,i =>
+            {
+                var targpath = GetPath(paths,i);
+                var branchzip_t = zip_t.Branches[Math.Min(i, zip_t.Branches.Count - 1)];
+                var branchzip_q = zip_q.Branches[Math.Min(i, zip_q.Branches.Count - 1)];
+                var branchzip_r = zip_r.Branches[Math.Min(i, zip_r.Branches.Count - 1)];
+                var branchzip_p = zip_p.Branches[Math.Min(i, zip_p.Branches.Count - 1)];
+                var branchzip_u = zip_u.Branches[Math.Min(i, zip_u.Branches.Count - 1)];
+                var branchzip_v = zip_v.Branches[Math.Min(i, zip_v.Branches.Count - 1)];
+                if (branchzip_t.Count > 0 && branchzip_q.Count > 0 && branchzip_r.Count > 0 && branchzip_p.Count > 0 && branchzip_u.Count > 0 && branchzip_v.Count > 0)
+                {
+                    int maxlen = Max(branchzip_t.Count, branchzip_q.Count, branchzip_r.Count, branchzip_p.Count, branchzip_u.Count, branchzip_v.Count);
+                    A[] temp = new A[maxlen];
+                    Parallel.For(0,maxlen,j =>
+                    {
+                        T zip_tx = branchzip_t[Math.Min(branchzip_t.Count - 1, j)];
+                        Q zip_qx = branchzip_q[Math.Min(branchzip_q.Count - 1, j)];
+                        R zip_rx = branchzip_r[Math.Min(branchzip_r.Count - 1, j)];
+                        P zip_px = branchzip_p[Math.Min(branchzip_p.Count - 1, j)];
+                        U zip_ux = branchzip_u[Math.Min(branchzip_u.Count - 1, j)];
+                        V zip_vx = branchzip_v[Math.Min(branchzip_v.Count - 1, j)];
+                        temp[j] = error.Validate((zip_tx, zip_qx, zip_rx, zip_px, zip_ux, zip_vx)) ? action(zip_tx, zip_qx, zip_rx, zip_px, zip_ux, zip_vx) : default;
+                    });
+                    result1.AppendRange(temp,targpath);
+                }
+            });
+            
+            return (result1);
+        }
+        
+        
     }
 }

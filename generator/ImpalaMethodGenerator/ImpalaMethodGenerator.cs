@@ -103,6 +103,9 @@ namespace ImpalaMethodGenerator
                     PrintEmptyLines(2);
                 }
             }
+            PrintEmptyLines(2);
+            PrintLines(GenZipFunction(6, 1));
+            PrintEmptyLines(2);
         }
 
 
