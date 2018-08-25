@@ -98,7 +98,7 @@ namespace Impala
             if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> curveA)) return;
             if (!DA.GetDataTree(1, out GH_Structure<GH_Curve> curveB)) return;
 
-            var (pts, parA, parB, ix) = ZipGraft2x4(curveA, curveB, CCX, CheckError);
+            var (pts, parA, parB, ix) = Zip2xGraft4(curveA, curveB, CCX, CheckError);
 
             DA.SetDataTree(0, pts);
             DA.SetDataTree(1, parA);

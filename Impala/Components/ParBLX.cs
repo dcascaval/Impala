@@ -81,7 +81,7 @@ namespace Impala
             if (!DA.GetDataTree(0, out GH_Structure<GH_Brep> brepTree)) return;
             if (!DA.GetDataTree(1, out GH_Structure<GH_Line> lineTree)) return;
 
-            var (cx,ptx,ix) = ZipGraft2x3(brepTree, lineTree, BLX, CheckError);
+            var (cx,ptx,ix) = Zip2xGraft3(brepTree, lineTree, BLX, CheckError);
 
             DA.SetDataTree(0, ix);
             DA.SetDataTree(1, ptx);

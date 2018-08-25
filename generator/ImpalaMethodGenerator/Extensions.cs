@@ -8,6 +8,10 @@ namespace ImpalaMethodGenerator
 
     public static class Extensions
     {
+        public static T[] Array<T>(params T[] inputs)
+        {
+            return inputs;
+        }
 
         public static int Max(params int[] inputs)
         {

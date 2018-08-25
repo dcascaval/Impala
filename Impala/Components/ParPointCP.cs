@@ -100,7 +100,7 @@ namespace Impala
             var kerror = new Error<(GH_Point, GH_Integer, GH_Integer)>(kCheck, kHandle, this);
             var CheckError = new ErrorChecker<(GH_Point, GH_Integer, GH_Integer)>(nullerror, kerror);
 
-            var (respt, residx) = ZipGraft3x2(sampleTree, kTree, idxTree, FindClosePt, CheckError);
+            var (respt, residx) = Zip3xGraft2(sampleTree, kTree, idxTree, FindClosePt, CheckError);
 
             DA.SetDataTree(0, respt);
             DA.SetDataTree(1, residx);

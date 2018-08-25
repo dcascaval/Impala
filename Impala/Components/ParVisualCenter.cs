@@ -103,7 +103,7 @@ namespace Impala
         {
             if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> curveTree)) return;
 
-            var pts = MapStructureParallel(curveTree, VisCen, CheckError, 1);
+            var pts = Zip1x1(curveTree, VisCen, CheckError);
 
             DA.SetDataTree(0, pts);
         }

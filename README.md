@@ -57,7 +57,7 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 - Transform functions (BoxMorph, SrfMorph) (Done - 8/23)
 - Functional extensisons (Halton, MeshFlow, VisCen) (Done - 8/25)
 - Benchmarking components (SumGroup, SumInputs) (Done - 8/21)
-- Composable method generator
+- Composable method generator (Done - 8/25)
 - Testing (Ongoing)
 - Documentation
 - Benchmarking (Ongoing)

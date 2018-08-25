@@ -130,7 +130,7 @@ namespace Impala
             if (!DA.GetDataTree(0, out GH_Structure<GH_Box> boxTree)) return;
             if (!DA.GetDataTree(1, out GH_Structure<GH_Integer> numTree)) return;
 
-            var ptx = ZipGraft2x1(boxTree, numTree, GenHaltonSeq, CheckError);
+            var ptx = Zip2xGraft1(boxTree, numTree, GenHaltonSeq, CheckError);
 
             DA.SetDataTree(0, ptx);
         }

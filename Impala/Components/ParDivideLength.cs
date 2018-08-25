@@ -125,7 +125,7 @@ namespace Impala
             var starttans = MapStructure(curveTree, c => new GH_Vector(c.Value.TangentAtStart), curveValidError);
 
             //Curve errors are pre-checked and already nulled out here
-            var (points, tangents, divparams) = ZipGraft4x3(curveTree, lenTree, startpts, starttans, DivCurve, CheckError);
+            var (points, tangents, divparams) = Zip4xGraft3(curveTree, lenTree, startpts, starttans, DivCurve, CheckError);
 
             DA.SetDataTree(0, points);
             DA.SetDataTree(1, tangents);

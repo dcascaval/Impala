@@ -24,13 +24,15 @@ namespace Impala
               "Shatter the curve along selected parameters.",
               "Impala", "Physical")
         {
-            var nerror = new Error<(GH_Curve, GH_Number, GH_Point, GH_Vector)>(NullCheck, NullHandle, this);
-            var terror = new Error<(GH_Curve, GH_Number, GH_Point, GH_Vector)>(TolValidCheck, TolValidHandle, this);
-            CheckError = new ErrorChecker<(GH_Curve, GH_Number, GH_Point, GH_Vector)>(nerror, terror);
+            var nerror = new Error<(GH_Curve, List<GH_Number>)>(NullCheck, NullHandle, this);
+            var cerror = new Error<(GH_Curve, List<GH_Number>)>(CurveValidCheck, CurveValidHandle, this);
+            CheckError = new ErrorChecker<(GH_Curve, List<GH_Number>)>(nerror, cerror);
         }
 
-        static ErrorChecker<(GH_Curve, GH_Number, GH_Point, GH_Vector)> CheckError;
-        static Func<(GH_Curve, GH_Number, GH_Point, GH_Vector), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null);
+        static ErrorChecker<(GH_Curve, List<GH_Number>)> CheckError;
+        static Func<(GH_Curve, List<GH_Number>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
+        static Func<(GH_Curve,List<GH_Number>), bool> CurveValidCheck => x => x.Item1.Value.IsValid && x.Item1.Value.GetLength() > Rhino.RhinoMath.ZeroTolerance;
+        static Action<GH_Component> CurveValidHandle => comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Curve.");
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -61,12 +63,7 @@ namespace Impala
             return result.Select(r => new GH_Curve(r)).ToArray();
         }
 
-        static Func<GH_Curve, bool> CurveValidCheck => x => x.Value.IsValid && x.Value.GetLength() > Rhino.RhinoMath.ZeroTolerance;
-        static Func<(GH_Curve, GH_Number, GH_Point, GH_Vector), bool> TolValidCheck => x => x.Item2.Value > Rhino.RhinoMath.ZeroTolerance;
-        static Action<GH_Component> CurveValidHandle => comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Curve.");
-        static Action<GH_Component> TolValidHandle => comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Division Length.");
-        static Func<GH_Curve, bool> CurveNull => c => c != null;
-
+      
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
@@ -77,16 +74,9 @@ namespace Impala
             if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> curveTree)) return;
             if (!DA.GetDataTree(1, out GH_Structure<GH_Number> lenTree)) return;
 
-            //Check the curve errors sequentially to avoid race condition
-            var crvnull = new Error<GH_Curve>(CurveNull, NullHandle, this);
-            var crvvalid = new Error<GH_Curve>(CurveValidCheck, CurveValidHandle, this);
-            var curveValidError = new ErrorChecker<GH_Curve>(crvnull, crvvalid);
+            var result = Zip1Red1xGraft1(curveTree, lenTree, ShatterCurve, CheckError);
 
-            //Curve errors are pre-checked and already nulled out here
-            //var result = Zip1Red1Graftx1(curveTree, lenTree, ShatterCurve, curveValidError);
-
-            //DA.SetDataTree(0, result);
-            return;
+            DA.SetDataTree(0, result);
         }
 
 
@@ -105,7 +95,7 @@ namespace Impala
 
         /// <summary>
         /// Gets the unique ID for this component. Do not change this ID after release.
-        /// </summary>
+        /// </summary>s
         public override Guid ComponentGuid
         {
             get { return new Guid("49FA7AC5-A4CD-452F-BA4B-4F2EBE1C1077"); }

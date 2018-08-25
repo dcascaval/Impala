@@ -76,6 +76,7 @@ namespace ImpalaMethodGenerator
         /// </summary>
         public static string MakeTuple(string[] elements, string sep, string start, string end)
         {
+            if (elements.Length == 0) return start + end;
             var str = new StringBuilder();
             for (int i = 0; i < elements.Length - 1; i++)
             {
