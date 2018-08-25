@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
@@ -13,25 +12,43 @@ using Rhino.Geometry.Intersect;
 
 using static Impala.Utilities;
 using static Impala.Generic;
+using static Impala.Errors;
+using static Impala.Generated;
 
-namespace Impala.Components
+namespace Impala
 {
-    class ParIso3d : GH_Component
+    public class ParIso3D : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ParIso3D class.
         /// </summary>
-        public ParIso3d()
+        public ParIso3D()
           : base("ParIsoVist3D", "ParIso3D",
               "Shoot a ring of rays at a set of obstacles.",
               "Impala", "Intersection")
         {
-            //var error = new Error<(GH_Mesh, GH_Point, GH_Vector)>(NullCheck, NullHandle, this);
-            //CheckError = new ErrorChecker<(GH_Mesh, GH_Point, GH_Vector)>(error);
+            var error = new Error<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)>(NullCheck, NullHandle, this);
+            var sampleError = new Error<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)>(CheckSamples, SampleHandle, this);
+            var radError = new Error<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)>(CheckRadius, RadiusHandle, this);
+
+            CheckError = new ErrorChecker<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)>(error, sampleError, radError);
         }
 
-        //public ErrorChecker<(GH_Mesh, GH_Point, GH_Vector)> CheckError;
-        //static Func<(GH_Mesh, GH_Point, GH_Vector), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+        public ErrorChecker<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)> CheckError; //don't need to null-check the redux
+        static Func<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+
+        public static bool CheckSamples((GH_Point,GH_Integer,GH_Number,List<GH_Mesh>) a)
+        {
+            return a.Item2.Value >= 1;
+        }
+
+        public static bool CheckRadius((GH_Point,GH_Integer,GH_Number,List<GH_Mesh>) a)
+        {
+            return a.Item3.Value > DocumentTolerance();
+        }
+
+        static Action<GH_Component> SampleHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Need at least density of 1.");
+        static Action<GH_Component> RadiusHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Radius cannot be negative.");
 
 
         /// <summary>
@@ -39,10 +56,10 @@ namespace Impala.Components
         /// </summary>
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddPointParameter("Point", "P", "Source point for isovist sample", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Density", "D", "Sample density", GH_ParamAccess.item, 10);
-            pManager.AddNumberParameter("Radius", "R", "Radius of isovist sampling", GH_ParamAccess.item, 100);
-            pManager.AddMeshParameter("Obstacles", "O", "Obstacles in sampling", GH_ParamAccess.list);
+            pManager.AddPointParameter("Point", "P", "Source point for isovist sample", GH_ParamAccess.tree);
+            pManager.AddIntegerParameter("Density", "D", "Sample density", GH_ParamAccess.tree, 10);
+            pManager.AddNumberParameter("Radius", "R", "Radius of isovist sampling", GH_ParamAccess.tree, 100);
+            pManager.AddMeshParameter("Obstacles", "O", "Obstacles in sampling", GH_ParamAccess.tree);
             //2d interval density parameter? cull-style
         }
 
@@ -71,7 +88,11 @@ namespace Impala.Components
             var plane = Plane.WorldXY;
             plane.Translate(new Vector3d(sampleCenter));
             var baseSamples = MeshSphereSamples(plane, radius, density);
-            var sortVecs = baseSamples.Vertices.Select(p => new Point3d(p.X, p.Y, p.Z)).Select(p => new Ray3d(sampleCenter, p - sampleCenter)).ToArray();
+            var sortVecs = baseSamples.Vertices.Select(p => new Point3d(p.X, p.Y, p.Z)).Select(p => {
+                var dir = new Vector3d(p - sampleCenter);
+                dir.Unitize();
+                return new Ray3d(sampleCenter, dir);
+            }).ToArray();
 
             var ptResults = new GH_Point[sortVecs.Length];
             var iResults = new GH_Integer[sortVecs.Length];
@@ -119,37 +140,13 @@ namespace Impala.Components
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            var samplePt = new GH_Point();
-            var numSamples = new GH_Integer();
-            var radius = new GH_Number();
-            var obstacles = new List<GH_Mesh>();
+            if (!DA.GetDataTree(0, out GH_Structure<GH_Point> pointTree)) return;
+            if (!DA.GetDataTree(1, out GH_Structure<GH_Integer> numTree)) return;
+            if (!DA.GetDataTree(2, out GH_Structure<GH_Number> radTree)) return;
+            if (!DA.GetDataTree(3, out GH_Structure<GH_Mesh> obstacleTree)) return;
 
-            if (!DA.GetData(0, ref samplePt)) return;
-            if (!DA.GetData(1, ref numSamples)) return;
-            if (!DA.GetData(2, ref radius)) return;
-            if (!DA.GetDataList(3, obstacles)) return;
+            var (pt, idx, ix) = Zip3Red1xGraft3(pointTree, numTree, radTree, obstacleTree, SolveIso3D, CheckError);
 
-            //This requires a Zip5Red1xGraft3();
-
-            if (obstacles.Count == 0)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "No obstacles to sample!");
-                return;
-            }
-
-            if (numSamples == null || numSamples.Value <= 1)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Need at least density of 1.");
-                return;
-            }
-
-            if (radius == null || radius.Value <= DocumentTolerance())
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Radius too small!");
-                return;
-            }
-
-            var (pt, idx, ix) = SolveIso3D(samplePt, numSamples, radius, obstacles);
             DA.SetDataList(0, pt);
             DA.SetDataList(1, idx);
             DA.SetDataList(2, ix);
@@ -181,10 +178,12 @@ namespace Impala.Components
         private static Mesh MeshSphereSamples(Plane @base, double radius, int density)
         {
             var sphere = new Sphere(Plane.WorldXY, radius);
-            var mesh = Mesh.CreateFromPlane(@base, new Interval(-radius, radius), new Interval(-radius, radius), density, density);
+            var tPlane = Plane.WorldXY;
+            tPlane.OriginZ = radius;
+            var mesh = Mesh.CreateFromPlane(tPlane, new Interval(-radius, radius), new Interval(-radius, radius), density, density);
             mesh.Normals.Clear();
 
-            for (int i = 0; i < mesh.Vertices.Count - 1; i++)
+            for (int i = 0; i < mesh.Vertices.Count; i++)
             {
                 var cpt = sphere.ClosestPoint(mesh.Vertices[i]);
                 var vec = new Vector3d(cpt);

@@ -75,7 +75,7 @@
     <Compile Include="Components\ParBrepInc.cs" />
     <Compile Include="Components\ParCCX.cs" />
     <Compile Include="Components\ParIso2D.cs" />
-    <Compile Include="Components\ParIso3d.cs" />
+    <Compile Include="Components\ParIso3D.cs" />
     <Compile Include="Components\ParMCX.cs" />
     <Compile Include="Components\ParMeshInc.cs" />
     <Compile Include="Components\ParMeshRay.cs" />
