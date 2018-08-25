@@ -126,7 +126,7 @@ namespace Impala
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("64524F88-19CF-4FFB-9B7F-E96E192258A4"); }
+            get { return new Guid("F148114E-45E8-4097-85F4-B7D6CC751355"); }
         }
     }
 }

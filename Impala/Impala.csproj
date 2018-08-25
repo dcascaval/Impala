@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Benchmarker.cs" />
+    <Compile Include="Components\HaltonSequence.cs" />
     <Compile Include="Components\ParBLX.cs" />
     <Compile Include="Components\ParBoxMorph.cs" />
     <Compile Include="Components\ParBrepCP.cs" />
