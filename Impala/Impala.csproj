@@ -79,9 +79,10 @@
     <Compile Include="Components\ParMCX.cs" />
     <Compile Include="Components\ParMeshInc.cs" />
     <Compile Include="Components\ParMeshRay.cs" />
+    <Compile Include="Components\ParShatter.cs" />
     <Compile Include="Components\ParSrfMorph.cs" />
     <Compile Include="Components\ParVisualCenter.cs" />
-    <Compile Include="Components\PointInCurve.cs" />
+    <Compile Include="Components\ParPointInCurve.cs" />
     <Compile Include="ErrorChecker.cs" />
     <Compile Include="Generated.cs" />
     <Compile Include="Generic.cs" />

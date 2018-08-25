@@ -55,7 +55,7 @@ namespace Impala
             Brep brep = b.Value;
             bool strict = s.Value;
             if (!brep.IsManifold) return new GH_Boolean(false);
-            return new GH_Boolean(brep.IsPointInside(pt, 1e-8, strict));
+            return new GH_Boolean(brep.IsPointInside(pt, DocumentTolerance(), strict));
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Impala
                 Brep brep = brepx[i];
                 bool strict = s.Value;
                 if (!brep.IsManifold) continue;
-                if (brep.IsPointInside(pt, 1e-8, strict)) return (new GH_Boolean(true), new GH_Integer(i));
+                if (brep.IsPointInside(pt, DocumentTolerance(), strict)) return (new GH_Boolean(true), new GH_Integer(i));
             }
             return (new GH_Boolean(false), new GH_Integer(-1));
         }

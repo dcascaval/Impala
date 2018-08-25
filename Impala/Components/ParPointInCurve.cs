@@ -37,8 +37,8 @@ namespace Impala
         /// </summary>
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddCurveParameter("Curve", "B", "Curves to test inclusion.", GH_ParamAccess.tree);
             pManager.AddPointParameter("Points", "P", "Points to test", GH_ParamAccess.tree);
+            pManager.AddCurveParameter("Curve", "C", "Curves to test inclusion.", GH_ParamAccess.tree);
             pManager.AddPlaneParameter("Plane", "P", "Plane to test in", GH_ParamAccess.tree, Plane.WorldXY);
             pManager.AddBooleanParameter("Strict", "S", "If true, inclusion is strict.", GH_ParamAccess.tree, false);
         }
@@ -71,8 +71,8 @@ namespace Impala
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
-            if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> curveTree)) return;
-            if (!DA.GetDataTree(1, out GH_Structure<GH_Point> pointTree)) return;
+            if (!DA.GetDataTree(0, out GH_Structure<GH_Point> pointTree)) return;
+            if (!DA.GetDataTree(1, out GH_Structure<GH_Curve> curveTree)) return;      
             if (!DA.GetDataTree(2, out GH_Structure<GH_Plane> planeTree)) return;
             if (!DA.GetDataTree(3, out GH_Structure<GH_Boolean> strictTree)) return;
 
@@ -128,8 +128,8 @@ namespace Impala
         /// </summary>
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddCurveParameter("Curve", "B", "Curves to test inclusion.", GH_ParamAccess.tree);
             pManager.AddPointParameter("Points", "P", "Points to test", GH_ParamAccess.tree);
+            pManager.AddCurveParameter("Curve", "C", "Curves to test inclusion.", GH_ParamAccess.tree);
             pManager.AddPlaneParameter("Plane", "P", "Plane to test in", GH_ParamAccess.tree, Plane.WorldXY);
             pManager.AddBooleanParameter("Strict", "S", "If true, inclusion is strict.", GH_ParamAccess.tree, false);
         }
@@ -139,8 +139,8 @@ namespace Impala
         /// </summary>
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddBooleanParameter("Included", "R", "Point contained in Curve", GH_ParamAccess.tree);
-            pManager.AddIntegerParameter("Index", "I", "Index of first region that contains this point", GH_ParamAccess.tree);
+            pManager.AddBooleanParameter("Included", "I", "Point contained in Curve", GH_ParamAccess.tree);
+            pManager.AddIntegerParameter("Index", "i", "Index of first region that contains this point", GH_ParamAccess.tree);
         }
 
         public static (GH_Boolean,GH_Integer) PointInCurves(GH_Point p, GH_Plane pl, GH_Boolean s, List<GH_Curve> gcrvs)
@@ -167,9 +167,8 @@ namespace Impala
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-
-            if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> curveTree)) return;
-            if (!DA.GetDataTree(1, out GH_Structure<GH_Point> pointTree)) return;
+            if (!DA.GetDataTree(0, out GH_Structure<GH_Point> pointTree)) return;
+            if (!DA.GetDataTree(1, out GH_Structure<GH_Curve> curveTree)) return;
             if (!DA.GetDataTree(2, out GH_Structure<GH_Plane> planeTree)) return;
             if (!DA.GetDataTree(3, out GH_Structure<GH_Boolean> strictTree)) return;
 

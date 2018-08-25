@@ -55,7 +55,7 @@ namespace Impala
             Point3d pt = p.Value;
             bool strict = s.Value;
             if (!mesh.IsClosed) return new GH_Boolean(false);
-            return new GH_Boolean(mesh.IsPointInside(pt, 1e-8, strict));
+            return new GH_Boolean(mesh.IsPointInside(pt, DocumentTolerance(), strict));
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Impala
             {
                 Mesh mesh = mshs[i];
                 if (!mesh.IsClosed) continue;
-                if (mesh.IsPointInside(pt, 1e-8, strict))
+                if (mesh.IsPointInside(pt, DocumentTolerance(), strict))
                 {
                     return (new GH_Boolean(true), new GH_Integer(i));
                 }

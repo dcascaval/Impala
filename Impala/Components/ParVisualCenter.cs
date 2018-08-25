@@ -24,7 +24,7 @@ namespace Impala
         public ParVisualCenter()
           : base("ParVisualCenter", "ParVisCen",
               "Find the visual center of a closed curve.",
-              "Impala", "Extension")
+              "Impala", "Extensions")
         {
             var error = new Error<GH_Curve>(NullCheck, NullHandle, this);
             CheckError = new ErrorChecker<GH_Curve>(error);

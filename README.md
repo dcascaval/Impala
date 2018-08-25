@@ -55,7 +55,7 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 - Intersection functions (BLX, CCX, MCX) (Done - 8/22)
 - Raycasting functions (ParMeshRay, Iso2D, Iso3D) (Done - 8/23)
 - Transform functions (BoxMorph, SrfMorph) (Done - 8/23)
-- Functional extensisons (Halton, MeshFlow, VisCen)
+- Functional extensisons (Halton, MeshFlow, VisCen) (Done - 8/25)
 - Benchmarking components (SumGroup, SumInputs) (Done - 8/21)
 - Composable method generator
 - Testing (Ongoing)
