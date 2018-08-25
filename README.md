@@ -51,7 +51,7 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 - Generate Methods for ZipGraft functions (Done - 8/21)
 - Closest Point functions (Points, Curves, Brep, Mesh) (Done - 8/22)
 - Containment functions (PointInBrep, PointInMesh, PointInCurve) (Done - 8/22)
-    - Multiple Containments
+    - Multiple Containments (Done - 8/25)
 - Intersection functions (BLX, CCX, MCX) (Done - 8/22)
 - Raycasting functions (ParMeshRay, Iso2D, Iso3D) (Done - 8/23)
 - Transform functions (BoxMorph, SrfMorph) (Done - 8/23)

@@ -31,7 +31,7 @@ namespace Impala
         }
 
         public ErrorChecker<GH_Curve> CheckError;
-        static Func<GH_Curve, bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
+        static Func<GH_Curve, bool> NullCheck = a => a != null;
 
 
         /// <summary>
