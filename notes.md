@@ -28,3 +28,19 @@ Current Efforts:
 		- Custom-reimplementation of the IGH_DataAccess interface to get over DA's issues
 			- Along with this, a custom ImpalaStructure that allows rapid computation (array-based, unsorted list, etc.)
 			- TypeConversions to necessitated GH_Structure
+
+#### Development Milestones (v1.0)
+
+- Curve Divisions and ZipGrafts (Done - 8/20)
+- Generate Methods for Zip functions (Done - 8/20)
+- Generate Methods for ZipRedux functions (Done - 8/21)
+- Generate Methods for ZipGraft functions (Done - 8/21)
+- Closest Point functions (Points, Curves, Brep, Mesh) (Done - 8/22)
+- Containment functions (PointInBrep, PointInMesh, PointInCurve) (Done - 8/22)
+    - Multiple Containments (Done - 8/25)
+- Intersection functions (BLX, CCX, MCX) (Done - 8/22)
+- Raycasting functions (ParMeshRay, Iso2D, Iso3D) (Done - 8/23)
+- Transform functions (BoxMorph, SrfMorph) (Done - 8/23)
+- Functional extensisons (Halton, MeshFlow, VisCen) (Done - 8/25)
+- Benchmarking components (SumGroup, SumInputs) (Done - 8/21)
+- Composable method generator (Done - 8/25)
