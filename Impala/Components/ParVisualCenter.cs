@@ -16,10 +16,14 @@ using static Impala.Utilities;
 
 namespace Impala
 {
+    /// <summary>
+    /// Find the Visual Center of a closed curve - this is useful with irregular curves
+    /// where an interior point is desired that resembles a center of gravity.
+    /// </summary>
     public class ParVisualCenter : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the Visual Center class.
+        /// Initializes a new instance of the Visual Center Component.
         /// </summary>
         public ParVisualCenter()
           : base("ParVisualCenter", "ParVisCen",
@@ -30,8 +34,8 @@ namespace Impala
             CheckError = new ErrorChecker<GH_Curve>(error);
         }
 
-        public ErrorChecker<GH_Curve> CheckError;
-        static Func<GH_Curve, bool> NullCheck = a => a != null;
+        private ErrorChecker<GH_Curve> CheckError;
+        private static Func<GH_Curve, bool> NullCheck = a => a != null;
 
 
         /// <summary>
@@ -50,7 +54,9 @@ namespace Impala
             pManager.AddPointParameter("Point", "P", "Center point", GH_ParamAccess.tree);
         }
 
-        //Curve must be closed
+        /// <summary>
+        /// Solve method for ParVisCen
+        /// </summary>
         public static GH_Point VisCen(GH_Curve ghcurve)
         {
             var c = ghcurve.Value;
@@ -98,7 +104,6 @@ namespace Impala
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> curveTree)) return;
@@ -115,8 +120,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0005_VisCen;
             }
         }

@@ -17,6 +17,9 @@ using static Impala.Utilities;
 
 namespace Impala
 {
+    /// <summary>
+    /// Closest point in a cloud
+    /// </summary>
     public class ParPointCP : GH_Component
     {
         /// <summary>
@@ -29,9 +32,8 @@ namespace Impala
         {
         }
 
-
-        public ErrorChecker<(GH_Point, GH_Integer, GH_Integer)> CheckError;
-        static Func<(GH_Point, GH_Integer, GH_Integer), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
+        private static ErrorChecker<(GH_Point, GH_Integer, GH_Integer)> CheckError;
+        private static Func<(GH_Point, GH_Integer, GH_Integer), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -55,7 +57,7 @@ namespace Impala
         /// <summary>
         /// Compute the closest point and index from the tree using our constructed index.
         /// </summary>
-        (GH_Point[],GH_Integer[]) FindClosePt(GH_Point gpt, GH_Integer gcount, GH_Integer gidx)
+        public static (GH_Point[],GH_Integer[]) FindClosePt(GH_Point gpt, GH_Integer gcount, GH_Integer gidx)
         {
             var cloud = pointCloudList[gidx.Value];
 

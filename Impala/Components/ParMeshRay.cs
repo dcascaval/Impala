@@ -15,10 +15,13 @@ using static Impala.Utilities;
 
 namespace Impala
 {
+    /// <summary>
+    /// Intersect a ray and a mesh
+    /// </summary>
     public class ParMeshRay : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParCurveCP class.
+        /// Initializes a new instance of the ParMeshRayIntersect component.
         /// </summary>
         public ParMeshRay()
           : base("ParMeshRayIntersect", "ParMeshRay",
@@ -29,8 +32,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Mesh, GH_Point, GH_Vector)>(error);
         }
 
-        public ErrorChecker<(GH_Mesh, GH_Point, GH_Vector)> CheckError;
-        static Func<(GH_Mesh, GH_Point, GH_Vector), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+        private static ErrorChecker<(GH_Mesh, GH_Point, GH_Vector)> CheckError;
+        private static Func<(GH_Mesh, GH_Point, GH_Vector), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
 
 
         /// <summary>
@@ -53,6 +56,13 @@ namespace Impala
             pManager.AddBooleanParameter("Hit", "H", "Boolean indicating hit or miss", GH_ParamAccess.tree);
         }
 
+        /// <summary>
+        /// Solve method for Mesh | Ray intersection
+        /// </summary>
+        /// <param name="gmsh"></param>
+        /// <param name="gpt"></param>
+        /// <param name="gdir"></param>
+        /// <returns></returns>
         public static (GH_Point, GH_Integer, GH_Boolean) MeshRayIX(GH_Mesh gmsh, GH_Point gpt, GH_Vector gdir)
         {
             Mesh m = gmsh.Value;
@@ -64,9 +74,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
@@ -88,8 +97,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0015_MeshRay;
             }
         }

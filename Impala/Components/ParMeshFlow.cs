@@ -8,10 +8,14 @@ using Rhino.Geometry;
 
 namespace Impala
 {
+
+    /// <summary>
+    /// Solves points flowing down a mesh according to a gravity vector
+    /// </summary>
     public class ParMeshFlow : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParMeshFlow class.
+        /// Initializes a new instance of the ParMeshFlow Component.
         /// </summary>
         public ParMeshFlow()
           : base("ParMeshFlow", "ParMeshFlow",
@@ -46,7 +50,6 @@ namespace Impala
         /// <summary>
         /// This method works on list-inputs and uses a special-case caching optimisation. As a result the looping logic is explicitly defined.
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             var ptList = new List<GH_Point>();
@@ -171,8 +174,10 @@ namespace Impala
             DA.SetDataList("Steps", polySteps);
         }
 
-        //Todo: add velocity and acceleration to this method - accel controls how much it can continue going up. Keep track of current orientation vec.
-        List<Point3d> MeshFlow(Point3d pt, Mesh mesh, double tol, int steps)
+        /// <summary>
+        /// Solve method for flowing a point down a mesh
+        /// </summary>
+        public static List<Point3d> MeshFlow(Point3d pt, Mesh mesh, double tol, int steps)
         {
             List<Point3d> flowList = new List<Point3d>();
             Plane flowPlane = new Plane(pt, Vector3d.ZAxis);
@@ -198,7 +203,9 @@ namespace Impala
             return flowList;
         }
 
-        //Get the transformation by rotating the entire thing around the origin. Location doesn't matter since we'll be reorienting.
+        /// <summary>
+        /// Get the transformation by rotating the entire thing around the origin. Location doesn't matter since we'll be reorienting.
+        /// </summary>
         Transform GetReorientation(Vector3d dest)
         {
             if (dest.EpsilonEquals(-Vector3d.ZAxis, 1e-6))
@@ -210,8 +217,10 @@ namespace Impala
             }
         }
 
-        /** Error Checking Area - Provide as many informative runtime messages as possible. */
-        bool FullErrorCheck(GH_Point pt, GH_Mesh msh, GH_Number tol, GH_Integer step, GH_Vector vec)
+        ///<summary>
+        /// Verify validity of each input set with each error handled w/ separate message 
+        ///</summary>
+        public bool FullErrorCheck(GH_Point pt, GH_Mesh msh, GH_Number tol, GH_Integer step, GH_Vector vec)
         {
             bool flag = true;
             flag = flag && MeshTolVecErrorCheck(msh, tol, vec);
@@ -219,7 +228,7 @@ namespace Impala
             return flag;
         }
 
-        bool MeshTolVecErrorCheck(GH_Mesh msh, GH_Number tol, GH_Vector vec)
+        private bool MeshTolVecErrorCheck(GH_Mesh msh, GH_Number tol, GH_Vector vec)
         {
             bool flag = true;
             if (msh == null || tol == null || vec == null)
@@ -245,8 +254,7 @@ namespace Impala
             return flag;
         }
 
-  
-        bool PointStepErrorCheck(GH_Point pt, GH_Integer step)
+        private bool PointStepErrorCheck(GH_Point pt, GH_Integer step)
         {
             bool flag = true; 
             if (pt == null || step == null)
@@ -269,8 +277,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0014_MeshFlow;
             }
         }

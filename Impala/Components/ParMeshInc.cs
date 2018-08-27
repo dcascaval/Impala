@@ -13,10 +13,13 @@ using static Impala.Errors;
 
 namespace Impala
 {
+    /// <summary>
+    /// Point containment in a mesh
+    /// </summary>
     public class ParMeshInc : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParMeshCP class.
+        /// Initializes a new instance of the ParMeshInc Component
         /// </summary>
         public ParMeshInc()
           : base("ParMeshInc", "ParMeshInc",
@@ -27,8 +30,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Mesh, GH_Point, GH_Boolean)>(error);
         }
 
-        public ErrorChecker<(GH_Mesh, GH_Point, GH_Boolean)> CheckError;
-        static Func<(GH_Mesh, GH_Point, GH_Boolean), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+        private static ErrorChecker<(GH_Mesh, GH_Point, GH_Boolean)> CheckError;
+        private static Func<(GH_Mesh, GH_Point, GH_Boolean), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
 
 
         /// <summary>
@@ -49,6 +52,9 @@ namespace Impala
             pManager.AddBooleanParameter("Included", "I", "Point contained in Mesh", GH_ParamAccess.tree);
         }
 
+        /// <summary>
+        /// Solve method for point inclusion in mesh
+        /// </summary>
         public static GH_Boolean PointInMesh(GH_Mesh m, GH_Point p, GH_Boolean s)
         {         
             Mesh mesh = m.Value;
@@ -59,9 +65,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
@@ -82,8 +87,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0016_MeshInc;
             }
         }
@@ -97,10 +100,13 @@ namespace Impala
         }
     }
 
+    /// <summary>
+    /// Point containment in multiple meshes
+    /// </summary>
     public class ParMMeshInc : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParMeshCP class.
+        /// Initializes a new instance of the ParMMeshInc Component.
         /// </summary>
         public ParMMeshInc()
           : base("ParMMeshInc", "ParMMeshInc",
@@ -111,8 +117,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Point, GH_Boolean, List<GH_Mesh>)>(error);
         }
 
-        public ErrorChecker<(GH_Point, GH_Boolean, List<GH_Mesh>)> CheckError;
-        static Func<(GH_Point, GH_Boolean, List<GH_Mesh>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+        private static ErrorChecker<(GH_Point, GH_Boolean, List<GH_Mesh>)> CheckError;
+        private static Func<(GH_Point, GH_Boolean, List<GH_Mesh>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
 
 
         /// <summary>
@@ -134,7 +140,10 @@ namespace Impala
             pManager.AddIntegerParameter("Index", "I", "Index of first mesh that contains point", GH_ParamAccess.tree);
         }
 
-        public static (GH_Boolean,GH_Integer) PointInMesh(GH_Point p, GH_Boolean s, List<GH_Mesh> gmsh)
+        /// <summary>
+        /// Solve method for point inclusion in multiple meshes
+        /// </summary>
+        public static (GH_Boolean,GH_Integer) PointInMeshes(GH_Point p, GH_Boolean s, List<GH_Mesh> gmsh)
         {
             var mshs = gmsh.Where(g => g != null).Select(g => g.Value).ToArray();
             Point3d pt = p.Value;
@@ -153,9 +162,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
@@ -163,7 +171,7 @@ namespace Impala
             if (!DA.GetDataTree(1, out GH_Structure<GH_Point> pointTree)) return;
             if (!DA.GetDataTree(2, out GH_Structure<GH_Boolean> strictTree)) return;
 
-            var (ix,idx) = Zip2Red1x2(pointTree, strictTree, meshTree, PointInMesh, CheckError);
+            var (ix,idx) = Zip2Red1x2(pointTree, strictTree, meshTree, PointInMeshes, CheckError);
 
             DA.SetDataTree(0, ix);
             DA.SetDataTree(0, idx);
@@ -177,8 +185,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0013_MMeshInc;
             }
         }

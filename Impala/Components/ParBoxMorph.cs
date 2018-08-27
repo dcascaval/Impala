@@ -16,10 +16,14 @@ using static Impala.Utilities;
 
 namespace Impala
 {
-    public class ParBoxMorph : GH_Component
+    /// <summary>
+    /// Perform a box to box morph operation on a geometry object.
+    /// This is not public due to a race condition in Rhino.Geometry.SpaceMorph in Rhino 5 RhinoCommon SDK.
+    /// </summary>
+    class ParBoxMorph : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParBoxMorph class.
+        /// Initializes a new instance of the ParBoxMorph Component
         /// </summary>
         public ParBoxMorph()
           : base("ParBoxMorph", "ParBoxMorph",
@@ -31,10 +35,13 @@ namespace Impala
             CheckError = new ErrorChecker<(IGH_GeometricGoo, GH_Box, GH_TwistedBox)>(error,smerror);
         }
 
-        public ErrorChecker<(IGH_GeometricGoo, GH_Box, GH_TwistedBox)> CheckError;
-        static Func<(IGH_GeometricGoo, GH_Box, GH_TwistedBox), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
-        static Func<(IGH_GeometricGoo, GH_Box, GH_TwistedBox), bool> SmallCheck = a => a.Item2.Value.Volume > 1e-16;
-        static Action<GH_Component> SmallHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Cannot morph degenerate box.");
+        /// <summary>
+        /// Error Checking functions
+        /// </summary>
+        private ErrorChecker<(IGH_GeometricGoo, GH_Box, GH_TwistedBox)> CheckError;
+        private static Func<(IGH_GeometricGoo, GH_Box, GH_TwistedBox), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+        private static Func<(IGH_GeometricGoo, GH_Box, GH_TwistedBox), bool> SmallCheck = a => a.Item2.Value.Volume > 1e-16;
+        private static Action<GH_Component> SmallHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Cannot morph degenerate box.");
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -54,6 +61,13 @@ namespace Impala
             pManager.AddGeometryParameter("Geometry", "G", "Transformed geometry", GH_ParamAccess.tree);
         }
 
+        /// <summary>
+        /// Solve method for Box Morph
+        /// </summary>
+        /// <param name="geo">Geometry to morph</param>
+        /// <param name="gref">Reference Box</param>
+        /// <param name="gtarg">Target Box</param>
+        /// <returns></returns>
         public static IGH_GeometricGoo BoxMorpher(IGH_GeometricGoo geo, GH_Box gref, GH_TwistedBox gtarg)
         {
             var box = ((GH_Box)gref.DuplicateGeometry()).Value;
@@ -84,15 +98,10 @@ namespace Impala
             DA.SetDataTree(0, gx);
         }
 
-        /// <summary>
-        /// Provides an Icon for the component.
-        /// </summary>
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return null;
             }
         }

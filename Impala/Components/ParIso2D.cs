@@ -15,10 +15,13 @@ using static Impala.Utilities;
 
 namespace Impala
 {
+    /// <summary>
+    /// Raycast around a circular arc with additional samples at important mesh areas
+    /// </summary>
     public class ParIso2D : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParIso2D class.
+        /// Initializes a new instance of the ParIsoVist2D Component.
         /// </summary>
         public ParIso2D()
           : base("ParIsoVist2D", "ParIso2D",
@@ -28,25 +31,24 @@ namespace Impala
             var error = new Error<(GH_Point,GH_Plane,GH_Integer,GH_Number,GH_Interval,List<GH_Mesh>)>(NullCheck, NullHandle, this);
             var sampleError = new Error<(GH_Point, GH_Plane, GH_Integer, GH_Number, GH_Interval, List<GH_Mesh>)>(CheckSamples, SampleHandle, this);
             var radError = new Error<(GH_Point, GH_Plane, GH_Integer, GH_Number, GH_Interval, List<GH_Mesh>)>(CheckRadius, RadiusHandle, this);
-
             CheckError = new ErrorChecker<(GH_Point,GH_Plane,GH_Integer,GH_Number,GH_Interval,List<GH_Mesh>)>(error,sampleError,radError);
         }
 
-        public ErrorChecker<(GH_Point,GH_Plane,GH_Integer,GH_Number,GH_Interval,List<GH_Mesh>)> CheckError; //don't need to null-check the redux
-        static Func<(GH_Point,GH_Plane,GH_Integer,GH_Number,GH_Interval,List<GH_Mesh>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null && a.Item5 != null);
+        private static ErrorChecker<(GH_Point,GH_Plane,GH_Integer,GH_Number,GH_Interval,List<GH_Mesh>)> CheckError; //don't need to null-check the redux
+        private static Func<(GH_Point,GH_Plane,GH_Integer,GH_Number,GH_Interval,List<GH_Mesh>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null && a.Item5 != null);
 
-        public static bool CheckSamples ((GH_Point, GH_Plane, GH_Integer, GH_Number, GH_Interval, List<GH_Mesh>) a)
+        private static bool CheckSamples ((GH_Point, GH_Plane, GH_Integer, GH_Number, GH_Interval, List<GH_Mesh>) a)
         {
             return a.Item3.Value >= 1;
         }
 
-        public static bool CheckRadius((GH_Point, GH_Plane, GH_Integer, GH_Number, GH_Interval, List<GH_Mesh>) a)
+        private static bool CheckRadius((GH_Point, GH_Plane, GH_Integer, GH_Number, GH_Interval, List<GH_Mesh>) a)
         {
             return a.Item4.Value > DocumentTolerance();
         }
 
-        static Action<GH_Component> SampleHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Need at least 1 sample");
-        static Action<GH_Component> RadiusHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Radius cannot be negative.");
+        private static Action<GH_Component> SampleHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Need at least 1 sample");
+        private static Action<GH_Component> RadiusHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Radius cannot be negative.");
          
 
         /// <summary>
@@ -72,27 +74,31 @@ namespace Impala
             pManager.AddBooleanParameter("Hit", "H", "Boolean indicating hit or miss", GH_ParamAccess.tree);
         }
 
-        static IEnumerable<Point3d> ToPoints(Polyline p)
+        private static IEnumerable<Point3d> ToPoints(Polyline p)
         {
             return p;
         }
 
-        public static (GH_Point[], GH_Integer[], GH_Boolean[]) SolveIso2D(GH_Point gpt, GH_Plane gpl, GH_Integer gnum, GH_Number grad, GH_Interval gint, List<GH_Mesh> gobs)
+        /// <summary>
+        /// Solve Method for IsoVist 2D - Raycast around a circular arc with additional samples at important mesh areas
+        /// </summary>
+        public static (GH_Point[], GH_Integer[], GH_Boolean[]) SolveIso2D(GH_Point gSamplePt, GH_Plane gPlane, GH_Integer gSampleNum, 
+                                                                          GH_Number gRadius, GH_Interval gInterval, List<GH_Mesh> gObstacles)
         {
-            var meshes = gobs.Select(ob => ob.Value).ToArray();
-            var sampleCenter = gpt.Value;
-            var plane = gpl.Value;
+            var meshes = gObstacles.Select(ob => ob.Value).ToArray();
+            var sampleCenter = gSamplePt.Value;
+            var plane = gPlane.Value;
             plane.Translate(sampleCenter - plane.Origin);
-            var radius = grad.Value;
-            var sintv = gint.Value;
-            double samples = gnum.Value;
+            var radius = gRadius.Value;
+            var sintv = gInterval.Value;
+            double samples = gSampleNum.Value;
 
             var ixpts = meshes.SelectMany(m => {
                 var ix = Intersection.MeshPlane(m, plane);
                 if (ix == null || ix.Length == 0) return new Point3d[0];
                 return ix.SelectMany(ToPoints);
                 });
-            var smpt = IRange(0, gnum.Value).Select(i =>
+            var smpt = IRange(0, gSampleNum.Value).Select(i =>
              {
                  Vector3d baseVec = new Vector3d(plane.XAxis);
                  baseVec.Rotate(sintv.T0 + (sintv.Length) * i / samples, plane.ZAxis);
@@ -150,9 +156,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             if (!DA.GetDataTree(0, out GH_Structure<GH_Point> pointTree)) return;
@@ -176,8 +181,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0003_Iso2D;
             }
         }

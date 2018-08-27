@@ -14,13 +14,16 @@ using static Impala.Errors;
 
 namespace Impala
 {
+    /// <summary>
+    /// Divide a curve into segments of a set length.
+    /// </summary>
     public class ParDivideLength : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParDivideLength class.
+        /// Initializes a new instance of the ParDivideLength Component.
         /// </summary>
         public ParDivideLength()
-          : base("ParDivideLength", "parDivLen",
+          : base("ParDivideLength", "ParDivLen",
               "Divide a curve into segments with a preset length.",
               "Impala", "Physical")
         {
@@ -29,8 +32,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Curve, GH_Number, GH_Point, GH_Vector)>(nerror,terror);
         }
 
-        static ErrorChecker<(GH_Curve, GH_Number, GH_Point, GH_Vector)> CheckError;
-        static Func<(GH_Curve, GH_Number, GH_Point, GH_Vector), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null);
+        private static ErrorChecker<(GH_Curve, GH_Number, GH_Point, GH_Vector)> CheckError;
+        private static Func<(GH_Curve, GH_Number, GH_Point, GH_Vector), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null);
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -52,9 +55,9 @@ namespace Impala
         }
 
         /// <summary>
-        /// Divide a curve into segments of a set length.
+        /// Solve method - Divide a curve into segments of a set length.
         /// </summary>
-        (GH_Point[],GH_Vector[],GH_Number[]) DivCurve(GH_Curve gcrv, GH_Number gnum, GH_Point start, GH_Vector stan)
+        public static (GH_Point[],GH_Vector[],GH_Number[]) DivCurve(GH_Curve gcrv, GH_Number gnum, GH_Point start, GH_Vector stan)
         {
             var crv = (Curve)gcrv.Value.Duplicate();
             var divLen = gnum.Value;
@@ -98,16 +101,18 @@ namespace Impala
             return (pointArray, vectorArray, paramArray);  
         }
 
-        static Func<GH_Curve, bool> CurveValidCheck => x => x.Value.IsValid && x.Value.GetLength() > Rhino.RhinoMath.ZeroTolerance;
-        static Func<(GH_Curve, GH_Number, GH_Point, GH_Vector), bool> TolValidCheck => x => x.Item2.Value > Rhino.RhinoMath.ZeroTolerance;
-        static Action<GH_Component> CurveValidHandle => comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Curve.");
-        static Action<GH_Component> TolValidHandle => comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Division Length.");
-        static Func<GH_Curve, bool> CurveNull => c => c != null;
-        
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Error Checking
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
+        private static Func<GH_Curve, bool> CurveValidCheck => x => x.Value.IsValid && x.Value.GetLength() > Rhino.RhinoMath.ZeroTolerance;
+        private static Func<(GH_Curve, GH_Number, GH_Point, GH_Vector), bool> TolValidCheck => x => x.Item2.Value > Rhino.RhinoMath.ZeroTolerance;
+        private static Action<GH_Component> CurveValidHandle => comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Curve.");
+        private static Action<GH_Component> TolValidHandle => comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Division Length.");
+        private static Func<GH_Curve, bool> CurveNull => c => c != null;
+
+        /// <summary>
+        /// Loop through data structure - checks curve nulls and creates start points/tangent structures before loop
+        /// </summary>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             
@@ -141,8 +146,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0007_DivLen;
             }
         }

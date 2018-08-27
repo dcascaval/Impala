@@ -17,10 +17,13 @@ using static Impala.Generated;
 
 namespace Impala
 {
+    /// <summary>
+    /// Raycast an evenly spaced sphere of samples in all directions
+    /// </summary>
     public class ParIso3D : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParIso3D class.
+        /// Initializes a new instance of the ParIso3D Component.
         /// </summary>
         public ParIso3D()
           : base("ParIsoVist3D", "ParIso3D",
@@ -30,25 +33,24 @@ namespace Impala
             var error = new Error<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)>(NullCheck, NullHandle, this);
             var sampleError = new Error<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)>(CheckSamples, SampleHandle, this);
             var radError = new Error<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)>(CheckRadius, RadiusHandle, this);
-
             CheckError = new ErrorChecker<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)>(error, sampleError, radError);
         }
 
-        public ErrorChecker<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)> CheckError; //don't need to null-check the redux
-        static Func<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+        private static ErrorChecker<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>)> CheckError; //don't need to null-check the redux
+        private static Func<(GH_Point,GH_Integer,GH_Number,List<GH_Mesh>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
 
-        public static bool CheckSamples((GH_Point,GH_Integer,GH_Number,List<GH_Mesh>) a)
+        private static bool CheckSamples((GH_Point,GH_Integer,GH_Number,List<GH_Mesh>) a)
         {
             return a.Item2.Value >= 1;
         }
 
-        public static bool CheckRadius((GH_Point,GH_Integer,GH_Number,List<GH_Mesh>) a)
+        private static bool CheckRadius((GH_Point,GH_Integer,GH_Number,List<GH_Mesh>) a)
         {
             return a.Item3.Value > DocumentTolerance();
         }
 
-        static Action<GH_Component> SampleHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Need at least density of 1.");
-        static Action<GH_Component> RadiusHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Radius cannot be negative.");
+        private static Action<GH_Component> SampleHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Need at least density of 1.");
+        private static Action<GH_Component> RadiusHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Radius cannot be negative.");
 
 
         /// <summary>
@@ -72,19 +74,21 @@ namespace Impala
             pManager.AddBooleanParameter("Hit", "H", "Boolean indicating hit or miss", GH_ParamAccess.tree);
         }
 
-        static IEnumerable<Point3d> ToPoints(Polyline p)
+        private static IEnumerable<Point3d> ToPoints(Polyline p)
         {
             return p;
         }
 
 
-        //Todo: add mesh sampling
-        public static (GH_Mesh[], GH_Integer[], GH_Boolean[]) SolveIso3D(GH_Point gpt, GH_Integer gnum, GH_Number grad, List<GH_Mesh> gobs)
+        /// <summary>
+        /// Solve method for Iso3D - raycast an evenly spaced sphere of samples in all directions
+        /// </summary>
+        public static (GH_Mesh[], GH_Integer[], GH_Boolean[]) SolveIso3D(GH_Point gSamplePt, GH_Integer gDensity, GH_Number gRadius, List<GH_Mesh> gObstacles)
         {
-            var meshes = gobs.Select(ob => ob.Value).ToArray();
-            var sampleCenter = gpt.Value;
-            var radius = grad.Value;
-            var density = gnum.Value;
+            var meshes = gObstacles.Select(ob => ob.Value).ToArray();
+            var sampleCenter = gSamplePt.Value;
+            var radius = gRadius.Value;
+            var density = gDensity.Value;
             var plane = Plane.WorldXY;
             plane.Translate(new Vector3d(sampleCenter));
             var baseSamples = MeshSphereSamples(plane, radius, density);
@@ -137,9 +141,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure.
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             if (!DA.GetDataTree(0, out GH_Structure<GH_Point> pointTree)) return;
@@ -173,9 +176,10 @@ namespace Impala
             get { return new Guid("C907CEA0-B9A3-45F5-944C-F7A85D2342F7"); }
         }
 
-        //Radius must be positive
-        //density must be at least 1
-        private static Mesh MeshSphereSamples(Plane @base, double radius, int density)
+        /// <summary>
+        /// Get a mesh that contains an evenly spaced sample sphere
+        /// </summary>
+        public static Mesh MeshSphereSamples(Plane @base, double radius, int density)
         {
             var sphere = new Sphere(Plane.WorldXY, radius);
             var tPlane = Plane.WorldXY;

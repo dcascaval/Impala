@@ -14,13 +14,16 @@ using static Impala.Errors;
 
 namespace Impala
 {
+    /// <summary>
+    /// Divide a curve into segments along parameters
+    /// </summary>
     public class ParShatter : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParDivideLength class.
+        /// Initializes a new instance of the ParShatter Component.
         /// </summary>
         public ParShatter()
-          : base("ParShatter", "parShatter",
+          : base("ParShatter", "ParShatter",
               "Shatter the curve along selected parameters.",
               "Impala", "Physical")
         {
@@ -29,10 +32,10 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Curve, List<GH_Number>)>(nerror, cerror);
         }
 
-        static ErrorChecker<(GH_Curve, List<GH_Number>)> CheckError;
-        static Func<(GH_Curve, List<GH_Number>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
-        static Func<(GH_Curve,List<GH_Number>), bool> CurveValidCheck => x => x.Item1.Value.IsValid && x.Item1.Value.GetLength() > Rhino.RhinoMath.ZeroTolerance;
-        static Action<GH_Component> CurveValidHandle => comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Curve.");
+        private static ErrorChecker<(GH_Curve, List<GH_Number>)> CheckError;
+        private static Func<(GH_Curve, List<GH_Number>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
+        private static Func<(GH_Curve,List<GH_Number>), bool> CurveValidCheck => x => x.Item1.Value.IsValid && x.Item1.Value.GetLength() > Rhino.RhinoMath.ZeroTolerance;
+        private static Action<GH_Component> CurveValidHandle => comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Invalid Curve.");
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -52,9 +55,9 @@ namespace Impala
         }
 
         /// <summary>
-        /// Divide a curve into segments of a set length.
+        /// Solve method - Divide a curve into segments along parameters
         /// </summary>
-        GH_Curve[] ShatterCurve(GH_Curve gcrv, List<GH_Number> gnum)
+        public static GH_Curve[] ShatterCurve(GH_Curve gcrv, List<GH_Number> gnum)
         {
             var crv = (Curve)gcrv.Value.Duplicate();
             var divs = gnum.Where(g => g != null).Select(g => g.Value).OrderBy(k => k).ToArray();
@@ -63,11 +66,10 @@ namespace Impala
             return result.Select(r => new GH_Curve(r)).ToArray();
         }
 
-      
+
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
@@ -87,8 +89,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0006_Shatter;
             }
         }

@@ -14,11 +14,13 @@ using static Impala.Utilities;
 
 namespace Impala
 {
+    /// <summary>
+    /// Create a fast, random distribution of points within a box volume.
+    /// </summary>
     public class HaltonSequence : GH_Component
     {
-
         /// <summary>
-        /// Initializes a new instance of the Parallel Curve CP class.
+        /// Initializes a new instance of the Halton Sequence component
         /// </summary>
         public HaltonSequence()
           : base("HaltonSequence", "PopHalton",
@@ -29,8 +31,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Box, GH_Integer)>(error);
         }
 
-        static ErrorChecker<(GH_Box, GH_Integer)> CheckError;
-        static Func<(GH_Box, GH_Integer), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
+        private static ErrorChecker<(GH_Box, GH_Integer)> CheckError;
+        private static Func<(GH_Box, GH_Integer), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
         
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -51,8 +53,10 @@ namespace Impala
             pManager.AddPointParameter("Point", "P", "Generated points", GH_ParamAccess.tree);
         }
 
-        //Determine the i'th point in the halton sequence of base b
-        static double Halton(int i, double b)
+        /// <summary>
+        /// Determine the i'th point in the halton sequence of base b
+        /// </summary>
+        public static double Halton(int i, double b)
         {
             double f = 1;
             double r = 0;
@@ -68,7 +72,7 @@ namespace Impala
         }
 
         //Determine if two numbers are relatively prime
-        static bool IsCoPrime(int a, int b)
+        private static bool IsCoPrime(int a, int b)
         {
             if (((a | b) & 1) == 0) return false;
             while ((a & 1) == 0) a >>= 1;
@@ -90,7 +94,7 @@ namespace Impala
         }
 
         //Find the smallest larger coprime number
-        static int FindSmallestCoprime(params int[] tests)
+        private static int FindSmallestCoprime(params int[] tests)
         {
             int i = tests.Max() + 1;
             while (true)
@@ -100,7 +104,13 @@ namespace Impala
             }
         }
 
-        static GH_Point[] GenHaltonSeq(GH_Box gbounds, GH_Integer gnum)
+        /// <summary>
+        /// Solve method for Halton
+        /// </summary>
+        /// <param name="gbounds">Bounding box to fill</param>
+        /// <param name="gnum">Number of points to create</param>
+        /// <returns></returns>
+        public static GH_Point[] GenHaltonSeq(GH_Box gbounds, GH_Integer gnum)
         {
             Box bnds = gbounds.Value;
 
@@ -119,12 +129,11 @@ namespace Impala
             return IRange(0, num).Select(i => new GH_Point(new Point3d(s1[i], s2[i], s3[i]))).ToArray();
         }
 
-        static int BaseHaltonSeed => 2;
+        private static int BaseHaltonSeed => 2;
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure. 
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             if (!DA.GetDataTree(0, out GH_Structure<GH_Box> boxTree)) return;
@@ -142,8 +151,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0023_Halton;
             }
         }

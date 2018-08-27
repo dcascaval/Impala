@@ -12,10 +12,13 @@ using Grasshopper.Kernel.Data;
 
 namespace Impala
 {
+    /// <summary>
+    /// Time all the input components
+    /// </summary>
     public class StopWatch : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the StopWatch class.
+        /// Initializes a new instance of the StopWatch Component.
         /// </summary>
         public StopWatch()
           : base("BenchComponent", "StopWatch",
@@ -62,8 +65,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0001_Stopwatch;
             }
         }
@@ -77,10 +78,13 @@ namespace Impala
         }
     }
 
+    /// <summary>
+    /// Time a group of components
+    /// </summary>
     public class GroupStopWatch : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ImpalaTest class.
+        /// Initializes a new instance of the GroupStopWatch Component.
         /// </summary>
         public GroupStopWatch()
           : base("BenchGroup", "GStopWatch",
@@ -137,8 +141,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0000_GStopwatch;
             }
         }

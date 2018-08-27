@@ -13,11 +13,13 @@ using static Impala.Errors;
 
 namespace Impala
 {
-    //Todo: Multiple-curve version
+    /// <summary>
+    /// Test point inclusion in a curve
+    /// </summary>
     public class ParPointInCurve : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParCurveCP class.
+        /// Initializes a new instance of the ParPointInCurve Component.
         /// </summary>
         public ParPointInCurve()
           : base("ParPointInCurve", "ParPtinCrv",
@@ -28,8 +30,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Curve, GH_Point, GH_Plane, GH_Boolean)>(error);
         }
 
-        public ErrorChecker<(GH_Curve, GH_Point, GH_Plane, GH_Boolean)> CheckError;
-        static Func<(GH_Curve, GH_Point, GH_Plane, GH_Boolean), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null);
+        private static ErrorChecker<(GH_Curve, GH_Point, GH_Plane, GH_Boolean)> CheckError;
+        private static Func<(GH_Curve, GH_Point, GH_Plane, GH_Boolean), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null);
 
 
         /// <summary>
@@ -65,9 +67,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
@@ -89,8 +90,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0010_CurveInc;
             }
         }
@@ -104,11 +103,13 @@ namespace Impala
         }
     }
 
-    //Todo: Multiple-curve version
+    /// <summary>
+    /// Point inclusion in multiple curves
+    /// </summary>
     public class ParPointInCurves : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParCurveCP class.
+        /// Initializes a new instance of the ParPointInCurves Component.
         /// </summary>
         public ParPointInCurves()
           : base("ParPointInCurves", "ParPtInCrvs",
@@ -119,8 +120,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Point, GH_Plane, GH_Boolean, List<GH_Curve>)>(error);
         }
 
-        public ErrorChecker<(GH_Point, GH_Plane, GH_Boolean, List<GH_Curve>)> CheckError;
-        static Func<(GH_Point, GH_Plane, GH_Boolean, List<GH_Curve>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null);
+        private static ErrorChecker<(GH_Point, GH_Plane, GH_Boolean, List<GH_Curve>)> CheckError;
+        private static Func<(GH_Point, GH_Plane, GH_Boolean, List<GH_Curve>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null);
 
 
         /// <summary>
@@ -143,6 +144,9 @@ namespace Impala
             pManager.AddIntegerParameter("Index", "i", "Index of first region that contains this point", GH_ParamAccess.tree);
         }
 
+        /// <summary>
+        /// Solve method for point inclusion in curves
+        /// </summary>
         public static (GH_Boolean,GH_Integer) PointInCurves(GH_Point p, GH_Plane pl, GH_Boolean s, List<GH_Curve> gcrvs)
         {
             var curves = gcrvs.Where(c => c != null).Select(c => c.Value).ToArray();
@@ -162,9 +166,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             if (!DA.GetDataTree(0, out GH_Structure<GH_Point> pointTree)) return;
@@ -186,8 +189,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0008_MCurveInc;
             }
         }

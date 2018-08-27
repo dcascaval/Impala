@@ -13,10 +13,14 @@ using static Impala.Errors;
 
 namespace Impala
 {
+
+    /// <summary>
+    /// Closest point to a mesh
+    /// </summary>
     public class ParMeshCP : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParMeshCP class.
+        /// Initializes a new instance of the ParMeshCP Component.
         /// </summary>
         public ParMeshCP()
           : base("ParMeshCP", "ParMeshCP",
@@ -27,8 +31,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Point, GH_Mesh, GH_Number)>(error);
         }
 
-        public ErrorChecker<(GH_Point, GH_Mesh, GH_Number)> CheckError;
-        static Func<(GH_Point, GH_Mesh, GH_Number), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+        private static ErrorChecker<(GH_Point, GH_Mesh, GH_Number)> CheckError;
+        private static Func<(GH_Point, GH_Mesh, GH_Number), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
 
 
         /// <summary>
@@ -51,6 +55,9 @@ namespace Impala
             pManager.AddBooleanParameter("Projected", "X", "Was the point in threshold?", GH_ParamAccess.tree);  
         }
 
+        /// <summary>
+        /// Solve method for mesh closest point
+        /// </summary>
         public static (GH_Point, GH_Integer, GH_Boolean) MeshCP(GH_Point p, GH_Mesh m, GH_Number t)
         {
             Point3d pt = p.Value;
@@ -71,9 +78,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
         
@@ -96,8 +102,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0017_MeshCP;
             }
         }

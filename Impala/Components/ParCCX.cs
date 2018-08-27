@@ -15,10 +15,13 @@ using static Impala.Utilities;
 
 namespace Impala
 {
+    /// <summary>
+    /// Solve Curve | Curve intersection
+    /// </summary>
     public class ParCCX : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParCurveCP class.
+        /// Initializes a new instance of the ParCCX Component.
         /// </summary>
         public ParCCX()
           : base("ParCurveCurveIntersect", "ParCCX",
@@ -29,8 +32,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Curve, GH_Curve)>(error);
         }
 
-        public ErrorChecker<(GH_Curve, GH_Curve)> CheckError;
-        static Func<(GH_Curve, GH_Curve), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
+        private ErrorChecker<(GH_Curve, GH_Curve)> CheckError;
+        private static Func<(GH_Curve, GH_Curve), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
 
 
         /// <summary>
@@ -54,10 +57,13 @@ namespace Impala
             
         }
 
-        public static (GH_Point[], GH_Number[], GH_Number[],GH_Boolean[]) CCX(GH_Curve gha, GH_Curve ghb)
+        /// <summary>
+        /// Solve method for Curve | Curve intersection
+        /// </summary>
+        public static (GH_Point[], GH_Number[], GH_Number[],GH_Boolean[]) CCX(GH_Curve curveA, GH_Curve curveB)
         {
-            Curve a = gha.Value;
-            Curve b = ghb.Value;
+            Curve a = curveA.Value;
+            Curve b = curveB.Value;
 
             var tt = DocumentTolerance(); //Grasshopper does it this way. Why? Don't know. Compatibility.
             var ix = Intersection.CurveCurve(a, b, tt, 5.0*tt);
@@ -89,9 +95,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure.
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 

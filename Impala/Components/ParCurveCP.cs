@@ -12,14 +12,17 @@ using static Impala.Generated;
 
 namespace Impala
 {
+    /// <summary>
+    /// Closest point on a curve
+    /// </summary>
     public class ParCurveCP : GH_Component
     {
 
         /// <summary>
-        /// Initializes a new instance of the Parallel Curve CP class.
+        /// Initializes a new instance of the ParCurveCP component
         /// </summary>
         public ParCurveCP()
-          : base("Curve Closest Point", "ParCurveCP",
+          : base("ParCurveCP", "ParCurveCP",
               "Closest Point on a curve to a sample, within a tolerance.",
               "Impala", "Physical")
         {
@@ -27,8 +30,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Point, GH_Curve, GH_Number)>(error);
         }
 
-        static ErrorChecker<(GH_Point, GH_Curve, GH_Number)> CheckError;
-        static Func<(GH_Point, GH_Curve, GH_Number), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+        public static ErrorChecker<(GH_Point, GH_Curve, GH_Number)> CheckError;
+        public static Func<(GH_Point, GH_Curve, GH_Number), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -50,7 +53,10 @@ namespace Impala
             pManager.AddBooleanParameter("Projected", "X", "Was the point moved?", GH_ParamAccess.tree);
         }
 
-        static (GH_Point,GH_Number,GH_Boolean) CurveCP(GH_Point p, GH_Curve c, GH_Number t)
+        /// <summary>
+        /// Solve method for cloest point on a curve
+        /// </summary>
+        public static (GH_Point,GH_Number,GH_Boolean) CurveCP(GH_Point p, GH_Curve c, GH_Number t)
         {
             Point3d pt = p.Value;
             Curve crv = c.Value;
@@ -69,9 +75,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure.
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             if (!DA.GetDataTree(0, out GH_Structure<GH_Point> pointTree)) return;
@@ -92,8 +97,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0011_CurveCP;
             }
         }

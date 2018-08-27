@@ -15,10 +15,14 @@ using static Impala.Utilities;
 
 namespace Impala
 {
+
+    /// <summary>
+    /// Mesh | Curve Intersection
+    /// </summary>
     public class ParMCX : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParMCX class.
+        /// Initializes a new instance of the ParMCX Component.
         /// </summary>
         public ParMCX()
           : base("ParMeshCurveIntersect", "ParMCX",
@@ -29,8 +33,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Mesh, GH_Curve)>(error);
         }
 
-        public ErrorChecker<(GH_Mesh, GH_Curve)> CheckError;
-        static Func<(GH_Mesh, GH_Curve), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
+        private static ErrorChecker<(GH_Mesh, GH_Curve)> CheckError;
+        private static Func<(GH_Mesh, GH_Curve), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
 
 
         /// <summary>
@@ -52,6 +56,9 @@ namespace Impala
             pManager.AddBooleanParameter("Intersection", "X", "Do the curves intersect?", GH_ParamAccess.tree);
         }
 
+        /// <summary>
+        /// Solve method for Mesh | Curve intersection
+        /// </summary>
         public static (GH_Point[], GH_Integer[], GH_Boolean[]) MCX(GH_Mesh ghmesh, GH_Curve ghcurve)
         {
             Mesh m = ghmesh.Value;
@@ -74,9 +81,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
@@ -97,8 +103,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0018_MeshCurve;
             }
         }

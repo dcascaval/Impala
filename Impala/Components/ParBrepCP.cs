@@ -13,10 +13,13 @@ using static Impala.Errors;
 
 namespace Impala
 {
+    /// <summary>
+    /// Finds the closest point on a brep to a sample point.
+    /// </summary>
     public class ParBrepCP : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParBrepCP class.
+        /// Initializes a new instance of the ParBrepCP Component.
         /// </summary>
         public ParBrepCP()
           : base("ParBrepCP", "ParBrepCP",
@@ -27,8 +30,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Point, GH_Brep, GH_Number)>(error);
         }
 
-        public ErrorChecker<(GH_Point, GH_Brep, GH_Number)> CheckError;
-        static Func<(GH_Point, GH_Brep, GH_Number), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
+        private ErrorChecker<(GH_Point, GH_Brep, GH_Number)> CheckError;
+        private static Func<(GH_Point, GH_Brep, GH_Number), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null);
 
 
         /// <summary>
@@ -52,6 +55,9 @@ namespace Impala
             pManager.AddBooleanParameter("Projected", "X", "Was the point in threshold?", GH_ParamAccess.tree);
         }
 
+        /// <summary>
+        /// Solve method for Brep CP
+        /// </summary>
         public static (GH_Point, GH_Vector, GH_Number, GH_Boolean) BrepCP(GH_Point p, GH_Brep m, GH_Number t)
         {
             Point3d pt = p.Value;
@@ -71,9 +77,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure.
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
@@ -97,8 +102,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0021_BrepCP;
             }
         }

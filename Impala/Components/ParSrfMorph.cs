@@ -15,7 +15,11 @@ using static Impala.Utilities;
 
 namespace Impala
 {
-    public class ParSrfMorph : GH_Component
+    /// <summary>
+    /// Perform a surface morph operation on a geometry object by using surface UVW coordinates.
+    /// This is not public due to a race condition in Rhino.Geometry.SpaceMorph in Rhino 5 RhinoCommon SDK.
+    /// </summary>
+    class ParSrfMorph : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ParSrfMorph class.
@@ -30,12 +34,12 @@ namespace Impala
             CheckError = new ErrorChecker<(IGH_GeometricGoo, GH_Box, GH_Surface, GH_Interval, GH_Interval, GH_Interval)>(error, smerror);
         }
 
-        public ErrorChecker<(IGH_GeometricGoo, GH_Box, GH_Surface, GH_Interval, GH_Interval, GH_Interval)> CheckError;
-        static Func<(IGH_GeometricGoo, GH_Box, GH_Surface, GH_Interval, GH_Interval, GH_Interval), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null && a.Item5 != null && a.Item6 != null);
-        static Func<(IGH_GeometricGoo, GH_Box, GH_Surface, GH_Interval, GH_Interval, GH_Interval), bool> SmallCheck = a => a.Item2.Value.Volume > 1e-16;
-        static Action<GH_Component> SmallHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Cannot morph degenerate box.");
-        static Action<GH_Component> ZeroHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Surface space extents cannot be zero.");
-        static Func<(IGH_GeometricGoo, GH_Box, GH_Surface, GH_Interval, GH_Interval, GH_Interval), bool> ZeroCheck = a => (!a.Item4.Value.IsSingleton && !a.Item5.Value.IsSingleton && !a.Item6.Value.IsSingleton);
+        private ErrorChecker<(IGH_GeometricGoo, GH_Box, GH_Surface, GH_Interval, GH_Interval, GH_Interval)> CheckError;
+        private static Func<(IGH_GeometricGoo, GH_Box, GH_Surface, GH_Interval, GH_Interval, GH_Interval), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3 != null && a.Item4 != null && a.Item5 != null && a.Item6 != null);
+        private static Func<(IGH_GeometricGoo, GH_Box, GH_Surface, GH_Interval, GH_Interval, GH_Interval), bool> SmallCheck = a => a.Item2.Value.Volume > 1e-16;
+        private static Action<GH_Component> SmallHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Cannot morph degenerate box.");
+        private static Action<GH_Component> ZeroHandle = c => c.AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Surface space extents cannot be zero.");
+        private static Func<(IGH_GeometricGoo, GH_Box, GH_Surface, GH_Interval, GH_Interval, GH_Interval), bool> ZeroCheck = a => (!a.Item4.Value.IsSingleton && !a.Item5.Value.IsSingleton && !a.Item6.Value.IsSingleton);
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -58,6 +62,9 @@ namespace Impala
             pManager.AddGeometryParameter("Geometry", "G", "Transformed geometry", GH_ParamAccess.tree);
         }
 
+        /// <summary>
+        /// Solve method for Surface Morph.
+        /// </summary>
         public static IGH_GeometricGoo SrfMorpher(IGH_GeometricGoo geo, GH_Box gref, GH_Surface gtarg, GH_Interval gu, GH_Interval gv, GH_Interval gw)
         {
             var targ = gtarg.Value.Faces[0].DuplicateSurface();
@@ -74,9 +81,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through the tree data-structure.
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
@@ -99,8 +105,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return null;
             }
         }

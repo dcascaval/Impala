@@ -12,10 +12,13 @@ using static Impala.Errors;
 
 namespace Impala
 {
+    /// <summary>
+    /// Closest point to a list of curves
+    /// </summary>
     public class ParClosestCurveCP : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParClosestCurveCP class.
+        /// Initializes a new instance of the ParClosestCurveCP component.
         /// </summary>
         public ParClosestCurveCP()
           : base("ParClosestCurveCP", "ParCCCP",
@@ -26,10 +29,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Point, GH_Number, List<GH_Curve>)>(error);
         }
 
-        public ErrorChecker<(GH_Point, GH_Number, List<GH_Curve>)> CheckError;
-        static Func<(GH_Point, GH_Number, List<GH_Curve>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3.Count > 0);
-
-        
+        private ErrorChecker<(GH_Point, GH_Number, List<GH_Curve>)> CheckError;
+        private static Func<(GH_Point, GH_Number, List<GH_Curve>), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null && a.Item3.Count > 0);      
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -52,7 +53,10 @@ namespace Impala
             pManager.AddNumberParameter("Distance", "D", "Distance", GH_ParamAccess.tree);
         }
 
-        static (GH_Point, GH_Number, GH_Integer, GH_Number) CCCP(GH_Point ghpt, GH_Number ghtol, List<GH_Curve> curves)
+        /// <summary>
+        /// Solve method for closest point on a list of curves.
+        /// </summary>
+        public static (GH_Point, GH_Number, GH_Integer, GH_Number) CCCP(GH_Point ghpt, GH_Number ghtol, List<GH_Curve> curves)
         {
             Point3d pt = ghpt.Value;
             double tol = ghtol.Value;
@@ -97,19 +101,13 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure.
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             if (!DA.GetDataTree(0, out GH_Structure<GH_Point> pointTree)) return;
             if (!DA.GetDataTree(1, out GH_Structure<GH_Curve> curveTree)) return;
             if (!DA.GetDataTree(2, out GH_Structure<GH_Number> tolTree)) return;
-
-            if (curveTree.IsEmpty || pointTree.IsEmpty)
-            {
-                return;
-            }
 
             var (points,parameters,idx,dist) =  Zip2Red1x4(pointTree, tolTree, curveTree, CCCP, CheckError);
             DA.SetDataTree(0, points);

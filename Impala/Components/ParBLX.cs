@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
@@ -16,10 +14,13 @@ using static Impala.Utilities;
 
 namespace Impala
 {
+    /// <summary>
+    /// Intersects a brep and a line.
+    /// </summary>
     public class ParBLX : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ParCurveCP class.
+        /// Initializes a new instance of the Par Brep | Line Intersect class.
         /// </summary>
         public ParBLX()
           : base("ParBrepLineIntersect", "ParBLX",
@@ -30,8 +31,8 @@ namespace Impala
             CheckError = new ErrorChecker<(GH_Brep, GH_Line)>(error);
         }
 
-        public ErrorChecker<(GH_Brep, GH_Line)> CheckError;
-        static Func<(GH_Brep, GH_Line), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
+        private ErrorChecker<(GH_Brep, GH_Line)> CheckError;
+        private static Func<(GH_Brep, GH_Line), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
 
 
         /// <summary>
@@ -53,6 +54,9 @@ namespace Impala
             pManager.AddCurveParameter("Curves", "C", "Intersection overlap curves", GH_ParamAccess.tree);  
         }
 
+        /// <summary>
+        /// Solve method for Brep | Line intersect.
+        /// </summary>
         public static (GH_Curve[],GH_Point[],GH_Boolean[]) BLX(GH_Brep b, GH_Line l)
         {
             Brep brep = b.Value;
@@ -72,9 +76,8 @@ namespace Impala
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// Loop through data structure
         /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
 
@@ -95,8 +98,6 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
                 return Impala.Properties.Resources.__0022_BLX;
             }
         }
