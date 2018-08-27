@@ -87,7 +87,11 @@ namespace Impala
             var sintv = gint.Value;
             double samples = gnum.Value;
 
-            var ixpts = meshes.SelectMany(m => Intersection.MeshPlane(m, plane).SelectMany(ToPoints));
+            var ixpts = meshes.SelectMany(m => {
+                var ix = Intersection.MeshPlane(m, plane);
+                if (ix == null || ix.Length == 0) return new Point3d[0];
+                return ix.SelectMany(ToPoints);
+                });
             var smpt = IRange(0, gnum.Value).Select(i =>
              {
                  Vector3d baseVec = new Vector3d(plane.XAxis);

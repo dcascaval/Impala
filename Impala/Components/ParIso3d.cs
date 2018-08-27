@@ -60,7 +60,6 @@ namespace Impala
             pManager.AddIntegerParameter("Density", "D", "Sample density", GH_ParamAccess.tree, 10);
             pManager.AddNumberParameter("Radius", "R", "Radius of isovist sampling", GH_ParamAccess.tree, 100);
             pManager.AddMeshParameter("Obstacles", "O", "Obstacles in sampling", GH_ParamAccess.tree);
-            //2d interval density parameter? cull-style
         }
 
         /// <summary>
@@ -68,8 +67,8 @@ namespace Impala
         /// </summary>
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddPointParameter("Point", "X", "Isovist intersections", GH_ParamAccess.tree);
-            pManager.AddIntegerParameter("Index", "I", "Index of obstacle hit", GH_ParamAccess.tree);
+            pManager.AddMeshParameter("Mesh", "M", "Isovist intersections as connected mesh", GH_ParamAccess.tree);
+            pManager.AddIntegerParameter("Index", "I", "Vertex index of obstacle hit", GH_ParamAccess.tree);
             pManager.AddBooleanParameter("Hit", "H", "Boolean indicating hit or miss", GH_ParamAccess.tree);
         }
 
@@ -80,7 +79,7 @@ namespace Impala
 
 
         //Todo: add mesh sampling
-        public static (GH_Point[], GH_Integer[], GH_Boolean[]) SolveIso3D(GH_Point gpt, GH_Integer gnum, GH_Number grad, List<GH_Mesh> gobs)
+        public static (GH_Mesh[], GH_Integer[], GH_Boolean[]) SolveIso3D(GH_Point gpt, GH_Integer gnum, GH_Number grad, List<GH_Mesh> gobs)
         {
             var meshes = gobs.Select(ob => ob.Value).ToArray();
             var sampleCenter = gpt.Value;
@@ -95,7 +94,7 @@ namespace Impala
                 return new Ray3d(sampleCenter, dir);
             }).ToArray();
 
-            var ptResults = new GH_Point[sortVecs.Length];
+            var ptResults = new Point3d[sortVecs.Length];
             var iResults = new GH_Integer[sortVecs.Length];
             var ixResults = new GH_Boolean[sortVecs.Length];
 
@@ -117,7 +116,7 @@ namespace Impala
                 }
                 if (bestIx < 0.0) //failure, use radius
                 {
-                    ptResults[j] = new GH_Point(jRay.Position + jRay.Direction * radius);
+                    ptResults[j] = jRay.Position + jRay.Direction * radius;
                     iResults[j] = new GH_Integer(-1);
                     ixResults[j] = new GH_Boolean(false);
                 }
@@ -126,13 +125,15 @@ namespace Impala
                     //Cap radius
                     var pt2 = jRay.PointAt(bestIx);
                     if (pt2.DistanceTo(sampleCenter) > radius) pt2 = jRay.Position + jRay.Direction * radius;
-                    ptResults[j] = new GH_Point(pt2);
+                    ptResults[j] = pt2;
                     iResults[j] = new GH_Integer(bestIdx);
                     ixResults[j] = new GH_Boolean(true);
                 }
             });
 
-            return (ptResults, iResults, ixResults);
+            ptResults.DoEach((pt, i) => baseSamples.Vertices.SetVertex(i, pt));
+
+            return (Array(new GH_Mesh(baseSamples)), iResults, ixResults);
         }
 
         /// <summary>
@@ -146,9 +147,9 @@ namespace Impala
             if (!DA.GetDataTree(2, out GH_Structure<GH_Number> radTree)) return;
             if (!DA.GetDataTree(3, out GH_Structure<GH_Mesh> obstacleTree)) return;
 
-            var (pt, idx, ix) = Zip3Red1xGraft3(pointTree, numTree, radTree, obstacleTree, SolveIso3D, CheckError);
+            var (msh, idx, ix) = Zip3Red1xGraft3(pointTree, numTree, radTree, obstacleTree, SolveIso3D, CheckError);
 
-            DA.SetDataList(0, pt);
+            DA.SetDataList(0, msh);
             DA.SetDataList(1, idx);
             DA.SetDataList(2, ix);
         }

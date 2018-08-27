@@ -63,7 +63,7 @@ namespace Impala
             (Point3d, double)[] results = new (Point3d, double)[plx.Count];
             Parallel.For(0, plx.Count, i =>
             {
-                double dst = double.MaxValue;
+                double dst = double.MinValue;
                 Point3d bPt = Point3d.Unset;
                 for (int j = 0; j < plx.Count; j++)
                 {
@@ -73,7 +73,7 @@ namespace Impala
                     if (!c.ClosestPoint(testPt, out double t)) continue;
 
                     var dx = testPt.DistanceTo(c.PointAt(t));
-                    if (dx < dst)
+                    if (dx > dst)
                     {
                         dst = dx;
                         bPt = testPt;
@@ -83,10 +83,10 @@ namespace Impala
             });
 
             Point3d bestPt = Point3d.Unset;
-            double dist = double.MaxValue;
+            double dist = double.MinValue;
             for (int i = 0; i < results.Length; i++)
             {
-                if (results[i].Item2 < dist)
+                if (results[i].Item2 > dist)
                 {
                     dist = results[i].Item2;
                     bestPt = results[i].Item1;                
