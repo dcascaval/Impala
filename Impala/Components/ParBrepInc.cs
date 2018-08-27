@@ -52,7 +52,7 @@ namespace Impala
         public static GH_Boolean PointInBrep(GH_Brep b, GH_Point p, GH_Boolean s)
         {
             Point3d pt = p.Value;
-            Brep brep = b.Value;
+            Brep brep = b.DuplicateBrep().Value;
             bool strict = s.Value;
             if (!brep.IsManifold) return new GH_Boolean(false);
             return new GH_Boolean(brep.IsPointInside(pt, DocumentTolerance(), strict));
@@ -84,7 +84,7 @@ namespace Impala
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.__0020_BrepInc;
             }
         }
 
@@ -97,12 +97,12 @@ namespace Impala
         }
     }
 
-    public class ParBrepsInc : GH_Component
+    public class ParMBrepInc : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ParBrepsInc class.
         /// </summary>
-        public ParBrepsInc()
+        public ParMBrepInc()
           : base("ParMBrepInc", "ParMBrepInc",
               "Test whether a point is inside a closed brep.",
               "Impala", "Containment")
@@ -134,10 +134,10 @@ namespace Impala
             pManager.AddIntegerParameter("Index", "I", "Index of first brep that contains point", GH_ParamAccess.tree);
         }
 
-        public static (GH_Boolean,GH_Integer) PointInBrep(GH_Point p, GH_Boolean s, List<GH_Brep> gbrp)
+        public static (GH_Boolean,GH_Integer) PointInBreps(GH_Point p, GH_Boolean s, List<GH_Brep> gbrp)
         {
             Point3d pt = p.Value;
-            var brepx = gbrp.Where(g => g != null).Select(g => g.Value).ToArray();
+            var brepx = gbrp.Where(g => g != null).Select(g => g.DuplicateBrep().Value).ToArray();
 
             for (int i = 0; i < brepx.Length; i++)
             {
@@ -160,7 +160,7 @@ namespace Impala
             if (!DA.GetDataTree(1, out GH_Structure<GH_Point> pointTree)) return;
             if (!DA.GetDataTree(2, out GH_Structure<GH_Boolean> strictTree)) return;
 
-            var (ix,idx) = Zip2Red1x2(pointTree, strictTree, brepTree, PointInBrep, CheckError);
+            var (ix,idx) = Zip2Red1x2(pointTree, strictTree, brepTree, PointInBreps, CheckError);
 
             DA.SetDataTree(0, ix);
             DA.SetDataTree(1, idx);
@@ -174,9 +174,7 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.__0019_MBrepInc;
             }
         }
 

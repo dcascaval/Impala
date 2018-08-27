@@ -12,12 +12,12 @@ using Grasshopper.Kernel.Data;
 
 namespace Impala
 {
-    public class Benchmarker : GH_Component
+    public class StopWatch : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the ImpalaTest class.
+        /// Initializes a new instance of the StopWatch class.
         /// </summary>
-        public Benchmarker()
+        public StopWatch()
           : base("BenchComponent", "StopWatch",
               "Returns the runtimes of all its inputs on any recompute.",
               "Impala", "Benchmarking")
@@ -64,7 +64,7 @@ namespace Impala
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.__0001_Stopwatch;
             }
         }
 
@@ -77,12 +77,12 @@ namespace Impala
         }
     }
 
-    public class GroupBenchmarker : GH_Component
+    public class GroupStopWatch : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ImpalaTest class.
         /// </summary>
-        public GroupBenchmarker()
+        public GroupStopWatch()
           : base("BenchGroup", "GStopWatch",
               "Returns the runtimes of all components in its group.",
               "Impala", "Benchmarking")
@@ -139,7 +139,7 @@ namespace Impala
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.__0000_GStopwatch;
             }
         }
 

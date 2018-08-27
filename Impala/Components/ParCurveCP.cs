@@ -19,7 +19,7 @@ namespace Impala
         /// Initializes a new instance of the Parallel Curve CP class.
         /// </summary>
         public ParCurveCP()
-          : base("Curve Closest Point", "parCurveCP",
+          : base("Curve Closest Point", "ParCurveCP",
               "Closest Point on a curve to a sample, within a tolerance.",
               "Impala", "Physical")
         {
@@ -94,7 +94,7 @@ namespace Impala
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return Impala.Properties.Resources.parccp;
+                return Impala.Properties.Resources.__0011_CurveCP;
             }
         }
 

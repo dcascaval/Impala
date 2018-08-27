@@ -18,7 +18,7 @@ namespace Impala
         /// Initializes a new instance of the ParClosestCurveCP class.
         /// </summary>
         public ParClosestCurveCP()
-          : base("ParClosestCurveCP", "parCCCP",
+          : base("ParClosestCurveCP", "ParCCCP",
               "Finds the closest point on a curve in a set of curves.",
               "Impala", "Physical")
         {
@@ -125,9 +125,7 @@ namespace Impala
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.__0009_CCCP;
             }
         }
 

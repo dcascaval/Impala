@@ -67,7 +67,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Benchmarker.cs" />
+    <Compile Include="Components\Stopwatch.cs" />
     <Compile Include="Components\HaltonSequence.cs" />
     <Compile Include="Components\ParBLX.cs" />
     <Compile Include="Components\ParBoxMorph.cs" />
@@ -171,6 +171,144 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\plus.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0000_IsoVist3d.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0001_IsoVist2D.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0002_PointCP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0003_VisCen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0004_Shatter.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0005_DivLen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0006_MCurveInc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0007_CurveInc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0008_Closest-Curve-CP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0009_Curve-CP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0010_CCX.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0011_MMesh-inc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0012_Mesh-Flow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0013_Mesh-Ray.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0014_Mesh-Inc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0015_MeshCP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0016_MCX.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0017_MBrepInc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0018_BrepInc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0019_BrepCP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0020_BLX.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0021_Halton.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0000_GStopwatch.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0001_Stopwatch.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0002_Iso3D.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0003_Iso2D.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0004_PointCP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0005_VisCen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0006_Shatter.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0007_DivLen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0008_MCurveInc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0009_CCCP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0010_CurveInc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0011_CurveCP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0012_CCX.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0013_MMeshInc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0014_MeshFlow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0015_MeshRay.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0016_MeshInc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0017_MeshCP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0018_MeshCurve.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0019_MBrepInc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0020_BrepInc.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0021_BrepCP.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0022_BLX.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\__0023_Halton.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

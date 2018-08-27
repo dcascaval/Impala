@@ -14,7 +14,7 @@ namespace Impala
         /// Initializes a new instance of the ParMeshFlow class.
         /// </summary>
         public ParMeshFlow()
-          : base("ParMeshFlow", "parMeshFlow",
+          : base("ParMeshFlow", "ParMeshFlow",
               "Find flow lines along a mesh according to a gravitational vector",
               "Impala", "Extensions")
         {
@@ -271,7 +271,7 @@ namespace Impala
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.__0014_MeshFlow;
             }
         }
 

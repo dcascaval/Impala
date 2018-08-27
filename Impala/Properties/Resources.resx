@@ -166,4 +166,76 @@
   <data name="plus" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\plus.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="__0000_GStopwatch" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0000_GStopwatch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0001_Stopwatch" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0001_Stopwatch.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0002_Iso3D" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0002_Iso3D.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0003_Iso2D" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0003_Iso2D.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0004_PointCP" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0004_PointCP.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0005_VisCen" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0005_VisCen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0006_Shatter" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0006_Shatter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0007_DivLen" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0007_DivLen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0008_MCurveInc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0008_MCurveInc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0009_CCCP" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0009_CCCP.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0010_CurveInc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0010_CurveInc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0011_CurveCP" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0011_CurveCP.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0012_CCX" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0012_CCX.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0013_MMeshInc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0013_MMeshInc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0014_MeshFlow" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0014_MeshFlow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0015_MeshRay" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0015_MeshRay.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0016_MeshInc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0016_MeshInc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0017_MeshCP" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0017_MeshCP.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0018_MeshCurve" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0018_MeshCurve.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0019_MBrepInc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0019_MBrepInc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0020_BrepInc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0020_BrepInc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0021_BrepCP" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0021_BrepCP.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0022_BLX" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0022_BLX.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="__0023_Halton" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\__0023_Halton.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

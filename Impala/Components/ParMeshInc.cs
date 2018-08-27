@@ -36,7 +36,7 @@ namespace Impala
         /// </summary>
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddMeshParameter("Mesh", "B", "Meshes to project to.", GH_ParamAccess.tree);
+            pManager.AddMeshParameter("Mesh", "M", "Meshes to project to.", GH_ParamAccess.tree);
             pManager.AddPointParameter("Points", "P", "Points to test from.", GH_ParamAccess.tree);
             pManager.AddBooleanParameter("Strict", "S", "If true, inclusion is strict.", GH_ParamAccess.tree, false);
         }
@@ -84,7 +84,7 @@ namespace Impala
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.__0016_MeshInc;
             }
         }
 
@@ -120,7 +120,7 @@ namespace Impala
         /// </summary>
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddMeshParameter("Mesh", "B", "Meshes to project to.", GH_ParamAccess.tree);
+            pManager.AddMeshParameter("Mesh", "M", "Meshes to project to.", GH_ParamAccess.tree);
             pManager.AddPointParameter("Points", "P", "Points to test from.", GH_ParamAccess.tree);
             pManager.AddBooleanParameter("Strict", "S", "If true, inclusion is strict.", GH_ParamAccess.tree, false);
         }
@@ -179,7 +179,7 @@ namespace Impala
             {
                 //You can add image files to your project resources and access them like this:
                 // return Resources.IconForThisComponent;
-                return null;
+                return Impala.Properties.Resources.__0013_MMeshInc;
             }
         }
 
