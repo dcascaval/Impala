@@ -1,7 +1,7 @@
 # Impala
 #### A multithreaded library of performative C# components for Grasshopper.
 
-!["Example parallelised definition"](example_screenshot.png)
+!["Icon Banner"](icon_banner.png)
 
 --- 
 #### Overview
@@ -72,7 +72,7 @@ Additional goals for future development include:
 * Automated integration of several Impala components in the form of a macro that searches for locations in a script where Impala could improve GH functionality and substituting the analogous component
 * Allowing inter-component parallelism within a group. By maintaining constant inputs and outputs in a group of components, their operation set can be run in parallel, making use of Grasshopper's already visually-explicit dependency graph to structure the computation. This can speed up definitions that don't have a large-operation bottleneck, but may have to perform multiple disjoint sets of computations.
 	
-	
+!["Example Screenshot"](example_screenshot.png)
 	
 	
 	

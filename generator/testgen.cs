@@ -5,6 +5,29 @@ using System.Text;
 
 namespace TestGen
 {
+
+    public static class Generators{
+
+        public static MakeGHStructure(string name, string type)
+        {
+            return $"var {name} = new GH_Structure<{type}>();";
+        }
+
+        public static EnsureGHPath(string structure,string path)
+        {
+            return $"{structure}.EnsurePath({path})";
+        }
+
+        public static GetGHBranch(string name, string structure, string index)
+        {
+            return $"var {name} = {structure}.Branches[Math.Min({index}, {structure}.Branches.Count - 1)];";
+        }
+
+        public static AppendGHTupleRange(string structure, string range, string tupleIndex, string path)
+        {
+            return $"{structure}.AppendRange(from item in {range} select item.Item{tupleIndex}, {path});";
+        }
+    }
     /*
             public static (GH_Structure<A>, GH_Structure<B>, GH_Structure<C>) ZipMaxTree3x3<T, Q, R, A, B, C>(GH_Structure<T> a,
             GH_Structure<Q> b, GH_Structure<R> c, Func<T, Q, R, (A, B, C)> action, ErrorChecker<(T, Q, R)> error)
