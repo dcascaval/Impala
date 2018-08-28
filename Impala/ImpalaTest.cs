@@ -8,12 +8,121 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 
+using static Impala.Generic;
 using static Impala.Generated;
+using static Impala.Utilities;
 
 namespace Impala
 {
     public static class ImpalaTest
     {
+        /// <summary>
+        /// Assert that the partition covers the whole range of branches contiguously
+        /// </summary>
+        public static bool VerifyPartition<T>(GH_Structure<T> tree, (int,int)[] partitions)
+            where T : IGH_Goo
+        {
+            if (partitions.Length == 0) return false;
+            if (partitions[0].Item1 != 0) return false;
+            for (int i = 0; i < partitions.Length - 1; i++)
+            {
+                if (partitions[i].Item2 != partitions[i + 1].Item1 - 1) return false;
+            }
+            if (partitions[partitions.Length - 1].Item2 != tree.PathCount) return false;
+            return true;
+        }
+
+
+        public static bool VerifyPartition<T,Q>(GH_Structure<T> tree1, GH_Structure<Q> tree2, (int,int)[] partitions)
+            where T : IGH_Goo where Q : IGH_Goo
+        {
+            if (partitions.Length == 0) return false;
+            if (partitions[0].Item1 != 0) return false;
+            for (int i = 0; i < partitions.Length - 1; i++)
+            {
+                if (partitions[i].Item2 != partitions[i + 1].Item1 - 1) return false;
+            }
+            if (partitions[partitions.Length - 1].Item2 != Math.Max(tree1.PathCount,tree2.PathCount)) return false;
+            return true;
+        }
+
+
+        // todo: parition a double
+        /// <summary>
+        /// Partition a single tree
+        /// </summary>
+        public static void GetPartition1DTest()
+        {
+            var tree1 = new GH_Structure<GH_Point>();
+            var fivepts = GetRandomGHPoints(5, 1);
+            tree1.AppendRange(fivepts);
+
+            var tree2 = new GH_Structure<GH_Point>();
+            var thouspts = GetRandomGHPoints(3000, 1);
+            tree2.AppendRange(thouspts);
+
+            var tree3 = GraftList(fivepts);
+            var tree4 = GraftList(thouspts);
+
+            var tree5 = new GH_Structure<GH_Point>();
+            var gen = new Random();
+            var branches = gen.Next(50, 500);
+            for (int i = 0; i < branches; i++)
+            {
+                tree5.AppendRange(GetRandomGHPoints(gen.Next(1, 5000), 1), new GH_Path(i));
+            }
+
+            var trees = Array(tree1, tree2, tree3, tree4, tree5);
+            int[] testGranularities = { 3, 200, 5, 3000, 5000, 50000 };
+
+            foreach (var tree in trees)
+            {
+                foreach (int gran in testGranularities)
+                {
+                    var tempPart = GetPartitions1D(tree, gran);
+                    if (!VerifyPartition(tree, tempPart)) throw new Exception($"Partition failed on {tree} with granularity {gran}");
+                }
+            }
+        }
+
+        public static void GetPartitionTest()
+        {
+            var tree1 = new GH_Structure<GH_Point>();
+            var fivepts = GetRandomGHPoints(5, 1);
+            tree1.AppendRange(fivepts);
+
+            var tree2 = new GH_Structure<GH_Point>();
+            var thouspts = GetRandomGHPoints(3000, 1);
+            tree2.AppendRange(thouspts);
+
+            var tree3 = GraftList(fivepts);
+            var tree4 = GraftList(thouspts);
+
+            var tree5 = new GH_Structure<GH_Point>();
+            var gen = new Random();
+            var branches = gen.Next(50, 500);
+            for (int i = 0; i < branches; i++)
+            {
+                tree5.AppendRange(GetRandomGHPoints(gen.Next(1, 5000), 1), new GH_Path(i));
+            }
+
+            var trees = Array(tree1, tree2, tree3, tree4, tree5);
+            int[] testGranularities = { 3, 200, 5, 3000, 5000, 50000 };
+
+            for (int i = 0; i < trees.Length; i++)
+            {
+                for (int j = 0; j < trees.Length; j++)
+                {
+                    if (i == j) continue;
+                    foreach (int gran in testGranularities) {
+                        var part = GetPartitions(trees[i], trees[j], gran);
+                        if (!VerifyPartition(trees[i], trees[j], part)) throw new Exception($"Partition failed on {tree1}x{tree2} with granularity {gran}");
+                    }
+                }
+            }
+        }
+
+
         public static List<GH_Point> GetRandomGHPoints(int n, double rng)
         {
             return GetRandomPoints(n, rng).Select(pt => new GH_Point(pt)).ToList();
@@ -109,8 +218,10 @@ namespace Impala
             this.ms = milliseconds;
             this.count = count;
         }
-
     }
+
+    
+
 
     public class ImpalaTester : GH_Component
     {
@@ -151,6 +262,8 @@ namespace Impala
 
             //var(t1,t2) = ImpalaTest.Zip3xTests(1,12000,10,1);
             //var (t1, t2) = ImpalaTest.FlatCasterTest(120000);
+            ImpalaTest.GetPartition1DTest();
+            ImpalaTest.GetPartitionTest();
             DA.SetData(0, new GH_String($"Run."));
             //DA.SetDataList(1, new List<GH_Integer>() { new GH_Integer(t1.ms), new GH_Integer(t2.ms)});
             //DA.SetDataList(2, new List<GH_Integer>() { new GH_Integer(t1.count), new GH_Integer(t2.count) });

@@ -76,7 +76,7 @@ namespace Impala
         }
 
         /// <summary>
-        /// Loop through data structure
+        /// Loop through data structure.
         /// </summary>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
