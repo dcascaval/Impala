@@ -13,7 +13,11 @@ using static Impala.Errors;
 
 namespace Impala
 {
-    public class ParBrepInc : GH_Component
+    /// <summary>
+    /// Point inclusion in Brep
+    /// WARNING: This component can crash Rhino! 
+    /// </summary>
+    class ParBrepInc : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ParBrepCP class.
@@ -66,7 +70,6 @@ namespace Impala
         /// </summary>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-
             if (!DA.GetDataTree(0, out GH_Structure<GH_Brep> brepTree)) return;
             if (!DA.GetDataTree(1, out GH_Structure<GH_Point> pointTree)) return;
             if (!DA.GetDataTree(2, out GH_Structure<GH_Boolean> strictTree)) return;
@@ -74,7 +77,6 @@ namespace Impala
             var result = Zip3x1(brepTree, pointTree, strictTree, PointInBrep, CheckError);
 
             DA.SetDataTree(0, result);
-            return;
         }
 
         /// <summary>
@@ -99,8 +101,9 @@ namespace Impala
 
     /// <summary>
     /// Point inclusion in multiple breps
+    /// WARNING: This component can crash Rhino! 
     /// </summary>
-    public class ParMBrepInc : GH_Component
+    class ParMBrepInc : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ParMBrep component

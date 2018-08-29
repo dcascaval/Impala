@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Data;
-using SquishyXMorphs;
+//using SquishyXMorphs;
 using Rhino.Geometry;
 using Rhino.Geometry.Intersect;
 
@@ -20,6 +20,7 @@ namespace Impala
     /// Perform a box to box morph operation on a geometry object.
     /// This is not public due to a race condition in Rhino.Geometry.SpaceMorph in Rhino 5 RhinoCommon SDK.
     /// </summary>
+    /*
     class ParBoxMorph : GH_Component
     {
         /// <summary>
@@ -113,5 +114,5 @@ namespace Impala
         {
             get { return new Guid("83028A17-8AE0-4E11-A409-2204E73B493E"); }
         }
-    }
+    }*/
 }

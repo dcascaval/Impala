@@ -16,8 +16,9 @@ namespace Impala
 {
     /// <summary>
     /// Intersects a brep and a line.
+    /// WARNING: This component can crash Rhino! 
     /// </summary>
-    public class ParBLX : GH_Component
+    class ParBLX : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the Par Brep | Line Intersect class.
@@ -59,7 +60,7 @@ namespace Impala
         /// </summary>
         public static (GH_Curve[],GH_Point[],GH_Boolean[]) BLX(GH_Brep b, GH_Line l)
         {
-            Brep brep = b.Value;
+            Brep brep = b.DuplicateBrep().Value;
             Line line = l.Value;
             var failResult = (new GH_Curve[0], new GH_Point[0], Array(new GH_Boolean(false)));
             var bbox = brep.GetBoundingBox(false);
@@ -80,15 +81,21 @@ namespace Impala
         /// </summary>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            try
+            {
+                if (!DA.GetDataTree(0, out GH_Structure<GH_Brep> brepTree)) return;
+                if (!DA.GetDataTree(1, out GH_Structure<GH_Line> lineTree)) return;
 
-            if (!DA.GetDataTree(0, out GH_Structure<GH_Brep> brepTree)) return;
-            if (!DA.GetDataTree(1, out GH_Structure<GH_Line> lineTree)) return;
+                var (cx, ptx, ix) = Zip2xGraft3(brepTree, lineTree, BLX, CheckError);
 
-            var (cx,ptx,ix) = Zip2xGraft3(brepTree, lineTree, BLX, CheckError);
-
-            DA.SetDataTree(0, ix);
-            DA.SetDataTree(1, ptx);
-            DA.SetDataTree(2, cx);
+                DA.SetDataTree(0, ix);
+                DA.SetDataTree(1, ptx);
+                DA.SetDataTree(2, cx);
+            }
+            catch (AccessViolationException exn)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, exn.Message);
+            }
         }
 
         /// <summary>

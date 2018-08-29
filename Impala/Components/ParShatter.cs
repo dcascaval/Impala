@@ -72,13 +72,19 @@ namespace Impala
         /// </summary>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            try
+            {
+                if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> curveTree)) return;
+                if (!DA.GetDataTree(1, out GH_Structure<GH_Number> lenTree)) return;
 
-            if (!DA.GetDataTree(0, out GH_Structure<GH_Curve> curveTree)) return;
-            if (!DA.GetDataTree(1, out GH_Structure<GH_Number> lenTree)) return;
+                var result = Zip1Red1xGraft1(curveTree, lenTree, ShatterCurve, CheckError);
 
-            var result = Zip1Red1xGraft1(curveTree, lenTree, ShatterCurve, CheckError);
-
-            DA.SetDataTree(0, result);
+                DA.SetDataTree(0, result);
+            }
+            catch (AccessViolationException exn)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, exn.Message);
+            }
         }
 
 

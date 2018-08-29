@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Grasshopper.Kernel.Data;
-using SquishyXMorphs;
+//using SquishyXMorphs;
 using Rhino.Geometry;
 
 using static Impala.Generated;
@@ -19,6 +19,7 @@ namespace Impala
     /// Perform a surface morph operation on a geometry object by using surface UVW coordinates.
     /// This is not public due to a race condition in Rhino.Geometry.SpaceMorph in Rhino 5 RhinoCommon SDK.
     /// </summary>
+    /*
     class ParSrfMorph : GH_Component
     {
         /// <summary>
@@ -116,5 +117,5 @@ namespace Impala
         {
             get { return new Guid("8670800B-274B-49FB-9632-0ACE90D94492"); }
         }
-    }
+    }*/
 }
