@@ -28,7 +28,7 @@ namespace Impala
             {
                 if (partitions[i].Item2 != partitions[i + 1].Item1 - 1) return false;
             }
-            if (partitions[partitions.Length - 1].Item2 != tree.PathCount) return false;
+            if (partitions[partitions.Length - 1].Item2 != tree.PathCount - 1) return false;
             return true;
         }
 
@@ -42,7 +42,7 @@ namespace Impala
             {
                 if (partitions[i].Item2 != partitions[i + 1].Item1 - 1) return false;
             }
-            if (partitions[partitions.Length - 1].Item2 != Math.Max(tree1.PathCount,tree2.PathCount)) return false;
+            if (partitions[partitions.Length - 1].Item2 != Math.Max(tree1.PathCount,tree2.PathCount) - 1) return false;
             return true;
         }
 
@@ -53,19 +53,20 @@ namespace Impala
         /// </summary>
         public static void GetPartition1DTest()
         {
+            var gen = new Random();
             var tree1 = new GH_Structure<GH_Point>();
-            var fivepts = GetRandomGHPoints(5, 1);
+            var fivepts = GetRandomGHPoints(gen.Next(1, 20), 1);
             tree1.AppendRange(fivepts);
 
             var tree2 = new GH_Structure<GH_Point>();
-            var thouspts = GetRandomGHPoints(3000, 1);
+            var thouspts = GetRandomGHPoints(gen.Next(1000, 5000), 1);
             tree2.AppendRange(thouspts);
 
             var tree3 = GraftList(fivepts);
             var tree4 = GraftList(thouspts);
 
             var tree5 = new GH_Structure<GH_Point>();
-            var gen = new Random();
+
             var branches = gen.Next(50, 500);
             for (int i = 0; i < branches; i++)
             {
@@ -73,7 +74,7 @@ namespace Impala
             }
 
             var trees = Array(tree1, tree2, tree3, tree4, tree5);
-            int[] testGranularities = { 3, 200, 5, 3000, 5000, 50000 };
+            int[] testGranularities = GetTestGranularities(400, 1, 50000);//{ 3, 200, 5, 3000, 5000, 50000 };
 
             foreach (var tree in trees)
             {
@@ -85,21 +86,28 @@ namespace Impala
             }
         }
 
+        private static int[] GetTestGranularities(int num, int min, int max)
+        {
+            var gen = new Random();
+            return IRange(0, num).Select(_ => gen.Next(min, max)).ToArray();
+        }
+
         public static void GetPartitionTest()
         {
+            var gen = new Random();
             var tree1 = new GH_Structure<GH_Point>();
-            var fivepts = GetRandomGHPoints(5, 1);
+            var fivepts = GetRandomGHPoints(gen.Next(1,20), 1);
             tree1.AppendRange(fivepts);
 
             var tree2 = new GH_Structure<GH_Point>();
-            var thouspts = GetRandomGHPoints(3000, 1);
+            var thouspts = GetRandomGHPoints(gen.Next(1000,5000), 1);
             tree2.AppendRange(thouspts);
 
             var tree3 = GraftList(fivepts);
             var tree4 = GraftList(thouspts);
 
             var tree5 = new GH_Structure<GH_Point>();
-            var gen = new Random();
+            
             var branches = gen.Next(50, 500);
             for (int i = 0; i < branches; i++)
             {
@@ -107,7 +115,8 @@ namespace Impala
             }
 
             var trees = Array(tree1, tree2, tree3, tree4, tree5);
-            int[] testGranularities = { 3, 200, 5, 3000, 5000, 50000 };
+
+            int[] testGranularities = GetTestGranularities(400, 1, 50000);//{ 3, 200, 5, 3000, 5000, 50000 };
 
             for (int i = 0; i < trees.Length; i++)
             {
@@ -223,7 +232,7 @@ namespace Impala
     
 
 
-    public class ImpalaTester : GH_Component
+    class ImpalaTester : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ImpalaTest class.

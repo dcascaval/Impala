@@ -29,6 +29,7 @@ namespace Impala
 
         public static Func<(GH_Number, GH_Number), bool> ZeroCheck = (a) => Math.Abs(a.Item2.Value) > 0;
         public static Action<GH_Component> ZeroHandle = comp => comp.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Division by Zero!");
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Provides an Icon for the component.

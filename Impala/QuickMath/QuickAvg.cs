@@ -25,6 +25,8 @@ namespace Impala
         {
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
@@ -86,6 +88,8 @@ namespace Impala
               "Maths", "Quick")
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
         /// <summary>
         /// Registers all the input parameters for this component.

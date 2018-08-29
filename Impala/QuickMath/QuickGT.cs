@@ -1,4 +1,5 @@
 ﻿using System;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 
 namespace Impala
@@ -18,6 +19,7 @@ namespace Impala
         public override Type InputType => Type.Number;
         public override Type OutputType => Type.Boolean;
         public override Func<GH_Number, GH_Number, GH_Boolean> Operation { get { return (a, b) => new GH_Boolean((a.Value - b.Value) > 1e-8); } }
+        public override GH_Exposure Exposure => GH_Exposure.tertiary;
 
         /// <summary>
         /// Provides an Icon for the component.

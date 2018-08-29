@@ -24,6 +24,8 @@ namespace Impala
         {
         }
 
+        public override GH_Exposure Exposure => GH_Exposure.secondary;
+
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
@@ -42,8 +44,8 @@ namespace Impala
 
         private GH_Interval BoundList(List<GH_Number> input)
         {
-            double min = Double.MaxValue;
-            double max = Double.MinValue;
+            double min = double.MaxValue;
+            double max = double.MinValue;
             for (int i = 0; i < input.Count; i++)
             {
                 var val = input[i].Value;
@@ -97,6 +99,8 @@ namespace Impala
               "Maths", "Quick")
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
         /// <summary>
         /// Registers all the input parameters for this component.

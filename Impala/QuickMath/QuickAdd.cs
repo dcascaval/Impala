@@ -1,4 +1,5 @@
 ﻿using System;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 
 namespace Impala
@@ -18,6 +19,7 @@ namespace Impala
         public override Func<GH_Number, GH_Number, GH_Number> Operation { get { return (a, b) => new GH_Number(a.Value + b.Value); } }
         public override Type InputType => Type.Number;
         public override Type OutputType => Type.Number;
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Provides an Icon for the component.
@@ -57,6 +59,7 @@ namespace Impala
         public override Func<GH_Vector, GH_Vector, GH_Vector> Operation { get { return (a, b) => new GH_Vector(a.Value + b.Value); } }
         public override Type InputType => Type.Vector;
         public override Type OutputType => Type.Vector;
+        public override GH_Exposure Exposure => GH_Exposure.quarternary;
 
         /// <summary>
         /// Provides an Icon for the component.

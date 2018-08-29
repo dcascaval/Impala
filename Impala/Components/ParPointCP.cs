@@ -32,7 +32,6 @@ namespace Impala
         {
         }
 
-        private static ErrorChecker<(GH_Point, GH_Integer, GH_Integer)> CheckError;
         private static Func<(GH_Point, GH_Integer, GH_Integer), bool> NullCheck = a => (a.Item1 != null && a.Item2 != null);
 
         /// <summary>
@@ -57,7 +56,7 @@ namespace Impala
         /// <summary>
         /// Compute the closest point and index from the tree using our constructed index.
         /// </summary>
-        public static (GH_Point[],GH_Integer[]) FindClosePt(GH_Point gpt, GH_Integer gcount, GH_Integer gidx)
+        private (GH_Point[],GH_Integer[]) FindClosePt(GH_Point gpt, GH_Integer gcount, GH_Integer gidx)
         {
             var cloud = pointCloudList[gidx.Value];
 

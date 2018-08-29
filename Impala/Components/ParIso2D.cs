@@ -79,6 +79,11 @@ namespace Impala
             return p;
         }
 
+        private static bool InParameterInterval(double min, double max, double test)
+        {
+            return test > min && test < max;
+        }
+
         /// <summary>
         /// Solve Method for IsoVist 2D - Raycast around a circular arc with additional samples at important mesh areas
         /// </summary>
@@ -93,6 +98,7 @@ namespace Impala
             var sintv = gInterval.Value;
             double samples = gSampleNum.Value;
 
+            var circ = new Circle(plane, radius);
             var ixpts = meshes.SelectMany(m => {
                 var ix = Intersection.MeshPlane(m, plane);
                 if (ix == null || ix.Length == 0) return new Point3d[0];
@@ -102,14 +108,22 @@ namespace Impala
              {
                  Vector3d baseVec = new Vector3d(plane.XAxis);
                  baseVec.Rotate(sintv.T0 + (sintv.Length) * i / samples, plane.ZAxis);
-                 return (sampleCenter + baseVec);
+                 var pt = sampleCenter + baseVec;
+                 var getTest = circ.ClosestParameter(pt, out double t);
+                 return (pt, t);
              }).ToList();
-            smpt.AddRange(ixpts);
-            var circ = new Circle(plane, radius);
-            var cptx = smpt.Select(p => { circ.ClosestParameter(p, out double t); return (p,t); });
-            var sortVecs = cptx.Select(pair => 
+            var min = smpt[0].t;
+            var max = smpt[smpt.Count - 1].t;
+
+            smpt.AddRange(ixpts.Select(pt =>
+            {
+                var getTest = circ.ClosestParameter(pt, out double test);
+                return (pt, test);
+            }).Where(pair => InParameterInterval(min, max, pair.test)));
+            
+            var sortVecs = smpt.Select(pair => 
             { 
-                var amp = pair.p - sampleCenter;
+                var amp = pair.pt - sampleCenter;
                 amp.Unitize();
                 return new Ray3d(sampleCenter, amp);
             }).ToArray();

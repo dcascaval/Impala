@@ -27,6 +27,7 @@ namespace Impala
         public override Type InputType => Type.Number;
         public override Type OutputType => Type.Number;
         public override Func<GH_Number, GH_Number, GH_Number> Operation { get { return (a, b) => new GH_Number(a.Value % b.Value); } }
+        public override GH_Exposure Exposure => GH_Exposure.primary;
 
         /// <summary>
         /// Provides an Icon for the component.

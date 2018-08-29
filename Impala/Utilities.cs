@@ -135,9 +135,10 @@ namespace Impala
                     tempGran = 0;
                 }
             }
-            if (prevIdx < PathLengths.Count - 1)
+            var lastIdx = partitions[partitions.Count - 1].Item2;
+            if (lastIdx < maxbranch - 1)
             {
-                partitions.Add((prevIdx, PathLengths.Count - 1));
+                partitions.Add((lastIdx + 1, maxbranch - 1));
             }
 
             return partitions.ToArray();
@@ -166,9 +167,11 @@ namespace Impala
                     tempGran = 0;
                 }
             }
-            if (prevIdx < PathLengths.Count - 1)
+            var lastIdx = partitions[partitions.Count - 1].Item2;
+            var maxbranch = a.Branches.Count;
+            if (lastIdx < maxbranch - 1)
             {
-                partitions.Add((prevIdx, PathLengths.Count - 1));
+                partitions.Add((lastIdx + 1, maxbranch - 1));
             }
 
             return partitions.ToArray();
