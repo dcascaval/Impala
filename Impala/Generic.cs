@@ -236,12 +236,12 @@ namespace Impala
         /// <summary>
         /// Reductions that aggregate an entire list of elements into one (ex: avg, bounds)
         /// </summary>
-        public static GH_Structure<Q> ParallelReduceStructure<T, Q>(GH_Structure<T> init, Func<List<T>, Q> action, ErrorChecker<List<T>> error, int granularity)
+        public static GH_Structure<Q> ParallelReduceStructure<T, Q>(GH_Structure<T> init, Func<List<T>, Q> action, ErrorChecker<List<T>> error, int granularity, int branchGranularity)
             where T : IGH_Goo
             where Q : IGH_Goo
         {
             var result = new GH_Structure<Q>();
-            var partitions = GetPartitions1D(init, granularity);
+            var partitions = PartitionItems1D(init, granularity);
             for (int i = 0; i < init.Branches.Count; i++)
             {
                 result.EnsurePath(init.Paths[i]);
@@ -266,12 +266,12 @@ namespace Impala
         /// <summary>
         /// Applies a function with a specified granularity (number of items per parallel branch) 
         /// </summary>
-        public static GH_Structure<Q> MapStructureParallel<T, Q>(GH_Structure<T> init, Func<T, Q> action, ErrorChecker<T> error, int granularity)
+        public static GH_Structure<Q> MapStructureParallel<T, Q>(GH_Structure<T> init, Func<T, Q> action, ErrorChecker<T> error, int granularity, int branchGranularity)
             where T : IGH_Goo
             where Q : IGH_Goo
         {
             var result = new GH_Structure<Q>();
-            var partitions = GetPartitions1D(init, granularity);           
+            var partitions = Partition(init, granularity, branchGranularity);           
 
             for (int i = 0; i < init.Branches.Count; i++)
             {
@@ -294,20 +294,22 @@ namespace Impala
         /// Applies GH's looping in a 2->1 scenario with the outer level (per-branch) parallelised
         /// Uses Partitions
         /// </summary>
-        public static GH_Structure<R> ZipMaxParallel1D<T, Q, R>(GH_Structure<T> a, GH_Structure<Q> b, Func<T, Q, R> action, ErrorChecker<(T, Q)> error, int granularity)
+        public static GH_Structure<R> ZipMaxParallel1D<T, Q, R>(GH_Structure<T> a, GH_Structure<Q> b, Func<T, Q, R> action, ErrorChecker<(T, Q)> error, int granularity, int branchGranularity)
             where T : IGH_Goo
             where Q : IGH_Goo
             where R : IGH_Goo
         {
             var result = new GH_Structure<R>();
             var maxbranch = Math.Max(a.Branches.Count, b.Branches.Count);
-            var partitions = GetPartitions(a, b, granularity);
+            var partitions = Partition(a, b, granularity, branchGranularity);
 
-            var paths = GetPathList(a, b);
+            var paths = PathList2(a, b);
+            
             for (int i = 0; i < maxbranch; i++)
             {
-                result.EnsurePath(GetPath(paths, i));
+                result.EnsurePath(paths[i]);
             }
+   
             Parallel.For(0, partitions.Length, p =>
             {
                 var part = partitions[p];
@@ -318,14 +320,24 @@ namespace Impala
                     if (ba.Count > 0 && bb.Count > 0)
                     {
                         int maxlen = Math.Max(ba.Count, bb.Count);
-                        R[] temp = new R[maxlen];
-                        for (int j = 0; j < maxlen; j++)
+                        if (maxlen > 1)
                         {
-                            T ax = ba[Math.Min(ba.Count - 1, j)];
-                            Q bx = bb[Math.Min(bb.Count - 1, j)];
-                            temp[j] = error.Validate((ax, bx)) ? action(ax, bx) : default;
+                            R[] temp = new R[maxlen];
+                            for (int j = 0; j < maxlen; j++)
+                            {
+                                T ax = ba[Math.Min(ba.Count - 1, j)];
+                                Q bx = bb[Math.Min(bb.Count - 1, j)];
+                                temp[j] = error.Validate((ax, bx)) ? action(ax, bx) : default;
+                            }
+                            result.AppendRange(temp,paths[i]);
                         }
-                        result.AppendRange(temp, GetPath(paths, i));
+                        else
+                        {
+                            T ax = ba[0];
+                            Q bx = bb[0];
+                            R res = error.Validate((ax, bx)) ? action(ax, bx) : default;
+                            result.Append(res, paths[i]);
+                        }
                     }
                 }
             });

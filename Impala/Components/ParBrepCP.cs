@@ -77,7 +77,7 @@ namespace Impala
             }
         }
 
-        private static int RunTimes = 0;
+        //private static int RunTimes = 0;
         /// <summary>
         /// Loop through data structure.
         /// </summary>

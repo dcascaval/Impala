@@ -74,14 +74,17 @@ namespace Impala
             }
 
             var trees = Array(tree1, tree2, tree3, tree4, tree5);
-            int[] testGranularities = GetTestGranularities(400, 1, 50000);//{ 3, 200, 5, 3000, 5000, 50000 };
+            int[] testGranularities = GetTestGranularities(20, 1, 50000);//{ 3, 200, 5, 3000, 5000, 50000 };
 
             foreach (var tree in trees)
             {
                 foreach (int gran in testGranularities)
                 {
-                    var tempPart = GetPartitions1D(tree, gran);
-                    if (!VerifyPartition(tree, tempPart)) throw new Exception($"Partition failed on {tree} with granularity {gran}");
+                    foreach (int bGran in testGranularities)
+                    {
+                        var tempPart = Partition(tree, gran, bGran);
+                        if (!VerifyPartition(tree, tempPart)) throw new Exception($"Partition failed on {tree} with granularity {gran}");
+                    }
                 }
             }
         }
@@ -116,7 +119,7 @@ namespace Impala
 
             var trees = Array(tree1, tree2, tree3, tree4, tree5);
 
-            int[] testGranularities = GetTestGranularities(400, 1, 50000);//{ 3, 200, 5, 3000, 5000, 50000 };
+            int[] testGranularities = GetTestGranularities(20, 1, 50000);//{ 3, 200, 5, 3000, 5000, 50000 };
 
             for (int i = 0; i < trees.Length; i++)
             {
@@ -124,8 +127,11 @@ namespace Impala
                 {
                     if (i == j) continue;
                     foreach (int gran in testGranularities) {
-                        var part = GetPartitions(trees[i], trees[j], gran);
-                        if (!VerifyPartition(trees[i], trees[j], part)) throw new Exception($"Partition failed on {tree1}x{tree2} with granularity {gran}");
+                        foreach (int bgran in testGranularities)
+                        {
+                            var part = Partition(trees[i], trees[j], gran, bgran);
+                            if (!VerifyPartition(trees[i], trees[j], part)) throw new Exception($"Partition failed on {tree1}x{tree2} with granularity {gran}");
+                        }
                     }
                 }
             }
@@ -232,7 +238,7 @@ namespace Impala
     
 
 
-    class ImpalaTester : GH_Component
+    public class ImpalaTester : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ImpalaTest class.
@@ -257,7 +263,7 @@ namespace Impala
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Output", "O", "Results from test run", GH_ParamAccess.item);
+            pManager.AddTextParameter("Output", "O", "Results from test run", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Runtime", "T", "Runtime in ms from each run", GH_ParamAccess.list);
             pManager.AddIntegerParameter("DataCount", "C", "Iterations computed",GH_ParamAccess.list);
         }
@@ -273,10 +279,13 @@ namespace Impala
             //var (t1, t2) = ImpalaTest.FlatCasterTest(120000);
             ImpalaTest.GetPartition1DTest();
             ImpalaTest.GetPartitionTest();
-            DA.SetData(0, new GH_String($"Run."));
+            //var part = PartitionBranches(50, 20).Select(i => $"({i.Item1},{i.Item2})");
+            DA.SetData(0, "Run");
             //DA.SetDataList(1, new List<GH_Integer>() { new GH_Integer(t1.ms), new GH_Integer(t2.ms)});
             //DA.SetDataList(2, new List<GH_Integer>() { new GH_Integer(t1.count), new GH_Integer(t2.count) });
         }
+
+       
 
         /// <summary>
         /// Provides an Icon for the component.

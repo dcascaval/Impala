@@ -47,7 +47,7 @@ namespace Impala
         {
             if (!DA.GetDataTree(0, out GH_Structure<GH_Number> a1)) return;
             var result = MapStructureParallel(a1, a => new GH_Number(Math.Abs(a.Value)), 
-                                                       new ErrorChecker<GH_Number>(new Error<GH_Number>(a => a != null, NullHandle, this)), 10000);
+                                                       new ErrorChecker<GH_Number>(new Error<GH_Number>(a => a != null, NullHandle, this)), 100000, 1000);
             DA.SetDataTree(0, result);
         }
 

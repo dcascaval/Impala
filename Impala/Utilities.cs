@@ -84,6 +84,30 @@ namespace Impala
             return PathList;
         }
 
+        public static List<GH_Path> PathList2<T,Q>(GH_Structure<T> a, GH_Structure<Q> b)
+            where T : IGH_Goo where Q : IGH_Goo
+        {
+            var paths = GetPathList(a,b);
+            var max = Max(a.Branches.Count, b.Branches.Count);
+            var lPath = paths[paths.Count - 1].Indices.ToArray();
+            var targIdx = lPath.Length - 1;
+            var baseItem = lPath[targIdx];
+
+            if (paths.Count < max)
+            {
+                GH_Path[] addPaths = new GH_Path[max - paths.Count];
+                for (int i = paths.Count; i < max; i++)
+                {
+                    lPath[targIdx] = i + baseItem;
+                    addPaths[i - paths.Count] = new GH_Path(lPath);
+                }
+                paths.AddRange(addPaths);
+            }
+
+            return paths;
+        }
+
+
         /// <summary>
         /// Fetches a path from the path list, and creates it if there is no existing path at this index.
         /// </summary>
@@ -92,24 +116,62 @@ namespace Impala
         /// <returns> Path at that index </returns>
         public static GH_Path GetPath(List<GH_Path> paths, int i)
         {
-            GH_Path path = new GH_Path();
-            if (i < paths.Count)
+            if (i < paths.Count) return new GH_Path(paths[i]);
+            else
             {
-                path = new GH_Path(paths[i]);
+                var path = paths[paths.Count - 1];
+                return path.Increment(path.Length - 1, (i - paths.Count) + 1);
+            }
+            
+        }
+
+        public static (int,int)[] Partition<T, Q>(GH_Structure<T> a, GH_Structure<Q> b, int granularity, int branchGran)
+            where T : IGH_Goo where Q : IGH_Goo
+        {
+            var maxbranch = Math.Max(a.Branches.Count, b.Branches.Count);
+            if (maxbranch > branchGran) //do a branch partitioning here
+            {
+                return PartitionBranches(maxbranch, branchGran);
             }
             else
             {
-                path = paths[paths.Count - 1].Increment(path.Length - 1, (i - paths.Count) + 1);
+                return PartitionItems(a, b, granularity);
             }
-            return path;
         }
 
-        /// <summary>
-        /// Partition a tree structure intersection into segments of branch ranges based on granularity. (Binary parallel)
-        /// </summary>
-        public static (int, int)[] GetPartitions<T, Q>(GH_Structure<T> a, GH_Structure<Q> b, int granularity)
+        public static (int, int)[] Partition<T>(GH_Structure<T> a, int granularity, int branchGran)
             where T : IGH_Goo
-            where Q : IGH_Goo
+        {
+            var maxbranch = a.Branches.Count;
+            if (maxbranch > branchGran) //do a branch partitioning here
+            {
+                return PartitionBranches(maxbranch, branchGran);
+            }
+            else
+            {
+                return PartitionItems1D(a, granularity);
+            }
+        }
+
+        public static (int, int)[] PartitionBranches (int maxbranch, int granularity)
+        {
+            var lng = new List<(int, int)>();
+            int i = 0;
+            var max = maxbranch - 1;
+            while (i < max)
+            {
+                int j = Math.Min(i + granularity, max);
+                lng.Add((i, j));
+                i = j + 1;
+            }
+
+            return lng.ToArray();
+        }
+            /// <summary>
+            /// Partition a tree structure intersection into segments of branch ranges based on granularity. (Binary parallel)
+            /// </summary>
+        public static (int, int)[] PartitionItems<T, Q>(GH_Structure<T> a, GH_Structure<Q> b, int granularity)
+            where T : IGH_Goo where Q : IGH_Goo
         {
             var parts = Max(a.DataCount, b.DataCount) / granularity;
             if (parts < 2) return new (int, int)[] { (0, Max(a.Branches.Count - 1, b.Branches.Count - 1)) };
@@ -147,7 +209,7 @@ namespace Impala
         /// <summary>
         /// Fetch partitions of a single tree with a specified granularity (for unary parallel operators)
         /// </summary>
-        public static (int, int)[] GetPartitions1D<T>(GH_Structure<T> a, int granularity)
+        public static (int, int)[] PartitionItems1D<T>(GH_Structure<T> a, int granularity)
             where T : IGH_Goo
         {
             var PathLengths = a.Branches.Select(br => br.Count).ToList();

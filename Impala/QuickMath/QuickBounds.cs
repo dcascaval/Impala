@@ -64,7 +64,7 @@ namespace Impala
             if (!DA.GetDataTree(0, out GH_Structure<GH_Number> a1)) return;
             var result = ParallelReduceStructure(a1,BoundList,
                                             new ErrorChecker<List<GH_Number>>(new Error<List<GH_Number>>(EmptyCheck, EmptyHandle, this),
-                                                                              new Error<List<GH_Number>>(CheckListNull, NullHandle, this)), 2000);
+                                                                              new Error<List<GH_Number>>(CheckListNull, NullHandle, this)), 2000, 500);
             DA.SetDataTree(0, result);
         }
 
@@ -146,7 +146,7 @@ namespace Impala
             if (!DA.GetDataTree(0, out GH_Structure<GH_Vector> a1)) return;
             var result = ParallelReduceStructure(a1, BoundList2D,
                                             new ErrorChecker<List<GH_Vector>>(new Error<List<GH_Vector>>(EmptyCheck, EmptyHandle, this),
-                                                                              new Error<List<GH_Vector>>(CheckListNull, NullHandle, this)), 2000);
+                                                                              new Error<List<GH_Vector>>(CheckListNull, NullHandle, this)), 2000, 500);
             DA.SetDataTree(0, result);
         }
 

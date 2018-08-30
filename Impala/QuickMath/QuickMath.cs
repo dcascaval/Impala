@@ -85,7 +85,7 @@ namespace Impala
             if (!DA.GetDataTree(0, out GH_Structure<T> a1)) return;
             if (!DA.GetDataTree(1, out GH_Structure<T> b1)) return;
 
-            var result = ZipMaxParallel1D(a1, b1, Operation, CheckError, 100000);
+            var result = ZipMaxParallel1D(a1, b1, Operation, CheckError, 100000, 10000);
             DA.SetDataTree(0, result);
         }
     }
