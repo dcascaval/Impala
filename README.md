@@ -1,11 +1,16 @@
 # Impala
-#### A multithreaded library of performative C# components for Grasshopper.
+
+### Multithreaded library of performative C# components for Grasshopper
 
 !["Icon Banner"](icon_banner.png)
 
---- 
+Looking for in-depth documentation and discussion, or how to get started using Impala? [Check out the Wiki](https://github.com/dcascaval/Impala/wiki) for a living document.
+
+---
+
 #### Overview
-Grasshopper provides a software environment for rapid scripting and design computation. This environment offers an extremely flexible, visual approach to programming. Impala replicates common **bottleneck Grasshopper operations with a focus on efficiency**, allowing complex scripts and static simulations embedded within Grasshopper to make use of all available computational capacity. This is primarily evident in scripts that deal with thousands of objects or rely heavily on **physically-based information and computation**. 
+
+Grasshopper provides a software environment for rapid scripting and design computation. This environment offers an extremely flexible, visual approach to programming. Impala replicates common **bottleneck Grasshopper operations with a focus on efficiency**, allowing complex scripts and static simulations embedded within Grasshopper to make use of all available computational capacity. This is primarily evident in scripts that deal with thousands of objects or rely heavily on **physically-based information and computation**.
 
 The primary target audience is experienced design computation practitioners and Grasshopper users who are running into the upper bounds of the tool's native, single-core performance, and are willing to take a finer approach to boosting performance at key points. Impala focuses primarily on replicating existing Grasshopper functionality and developing an environment suitable to seamless integration of performant or multithreaded computation within GH. To this end it currently contains three types of components:
 
@@ -13,38 +18,26 @@ The primary target audience is experienced design computation practitioners and 
 - Components that condense expensive Grasshopper patterns and use imperative methods to significantly reduce the time and space needed to obtain a result (ex: `Closest Curve Closest Point`, `MeshFlow`)
 - Components that limit Grasshopper's type-casting system in exchange for performance gains on larger inputs (ex: the `QuickMath` components)
 
-Additionally, performance is improved relative to native GH by exposing "threshold" parameters wherever possible - allowing the user to specify under which conditions they do not want the result of an operation, significantly speeding up the computation in these cases.
-	
-
-**Impala is not yet fully tested or ready for release. See Development Milestone (v1.0) for current progress.**
-
---- 
-#### Architecture
-
-Impala adapts Grasshopper's default logic for operating on multiple trees simultaneously. The primary goal is to extend Grasshopper's capabilities (by allowing a wider range of expensive operations) while maintaining the flexibility that GH's associative model lends to designers within C# code. 
-
-Impala provides a series of public, generic methods that operate on various combinations of `GH_Structure<T>` and provide standard and parallel functional operations (Map, Zip, Reduce, etc.) with integrated, **user-defined error checking operations**. These are part of the static class `Impala.Generated` and can be used in any other projects by referencing `Impala.dll` from a `GH_Component` implementation. They are parameterically defined and generated methods, and aim to cover all possible input-output and reduction/expansion combinations ((1 -> 1), (1 -> N), (N -> 1)) with all combinations of inputs on both ends. 
-
-Several components also make use of **granularity control**, and tuning this dynamically is a focus of future development. 
-	
-A set of test files and extensive benchmarking results provide examples (and, where applicable, guarantees of correctness against an equivalent native GH baseline implementation) for all Impala components, as well as a short set of analysis notes for each of them specifying the best use-cases. 
+**Impala 1.0 has been released! Grab it on [Food4Rhino](https://www.food4rhino.com/app/impala)**
 
 ---
+
 #### Compatibility
 
 - Impala is compatible with Rhinoceros 5 (SR 14), Grasshopper 0.9.0076 and later. Current tests using Rhino 6 and GH 1 indicate no break in functionality.
-- Impala uses the latest point-release of C# (7.3 at the time of writing) and is compiled with Visual Studio 2017 on Windows only. 
+- Impala uses the latest point-release of C# (7.3 at the time of writing) and is compiled with Visual Studio 2017 on Windows only.
 
 ---
+
 #### Benchmarks
 
 - Current benchmarks are available in `/bench`, and are generated primarily using `bencher.gh`. Standalone benchmark files are also used to test for correctness - a typical benchmark will verify correctness and measure performance against the equivalent native implementation to the Impala functionality. For example, a section of the QuickMath benchmark might look like this:
 
 Flat Input                 |  Random input
 :-------------------------:|:-------------------------:
-![](bench/Flat_BinAdd_Bench.jpg)  |  ![](bench/Random_BinAdd_Bench.jpg)
+![Flat Input](bench/Flat_BinAdd_Bench.jpg)  |  ![Random Input](bench/Random_BinAdd_Bench.jpg)
 
-And in Grasshopper: 
+And in Grasshopper:
 
 !["QuickMath speedtest benchmark, Arithmetic components"](quickmath_demo.png)
 
@@ -52,16 +45,18 @@ And in Grasshopper:
 
 Against Curve-Curve SingleThreaded  | Against Curve-Curve Multithreaded
 :-------------------------:|:-------------------------:
-![](bench/r6_ccx_Bench.jpg)  |  ![](bench/r6_mtx_flat_Bench.jpg)
+![ST Input](bench/r6_ccx_Bench.jpg)  |  ![Flat Input](bench/r6_mtx_flat_Bench.jpg)
 
 A particularly egregious input pattern result:
 
 !["Parallel BLX component benchmark"](parallel_benchmark.png)
 
 ---
+
 #### Development Milestones (v1.0)
-(see `notes.md` for progress and lessons learned throughout)
-- Almost complete! Documenting and preparing for release.
+
+Impala v1 is complete! Check out `notes.md` for progress.
+
 ---
 
 #### Propsed Extensions (v2.0)
@@ -73,16 +68,26 @@ A particularly egregious input pattern result:
 - Implement granularity control across the board, dynamically tune to system
 - Offsetting, Booleans (and reductions), Meshfilling algorithms
 
----	
+---
+
 #### Moving Forward
 
 Additional goals for future development include:
-* Composition of other expensive operations (occlusion, graph traversals, large scale collisions)
-* Automated integration of several Impala components in the form of a macro that searches for locations in a script where Impala could improve GH functionality and substituting the analogous component
-* Allowing inter-component parallelism within a group. By maintaining constant inputs and outputs in a group of components, their operation set can be run in parallel, making use of Grasshopper's already visually-explicit dependency graph to structure the computation. This can speed up definitions that don't have a large-operation bottleneck, but may have to perform multiple disjoint sets of computations.
-	
+
+- Composition of other expensive operations (occlusion, graph traversals, large scale collisions)
+- Automated integration of several Impala components in the form of a macro that searches for locations in a script where Impala could improve GH functionality and substituting the analogous component
+- Allowing inter-component parallelism within a group. By maintaining constant inputs and outputs in a group of components, their operation set can be run in parallel, making use of Grasshopper's already visually-explicit dependency graph to structure the computation. This can speed up definitions that don't have a large-operation bottleneck, but may have to perform multiple disjoint sets of computations.
+
 !["Example Screenshot"](example_screenshot.png)
-	
-	
-	
-	
+
+## License
+
+Impala is licensed under the MIT license.
+
+Copyright 2018 Dan Cascaval
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
