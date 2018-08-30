@@ -62,7 +62,7 @@ namespace Impala
 
             if (!curve.IsClosed) return new GH_Boolean(false);
             var cont = curve.Contains(pt, plane, DocumentTolerance());
-            var targ = strict ? cont == PointContainment.Inside : cont != PointContainment.Outside;
+            var targ = strict ? cont == PointContainment.Inside : cont != PointContainment.Outside && cont != PointContainment.Unset;
             return new GH_Boolean(targ);
         }
 
@@ -154,7 +154,7 @@ namespace Impala
             Plane plane = pl.Value;
             bool strict = s.Value;
 
-            for(int i = 0; i < curves.Length; i++)
+            for (int i = 0; i < curves.Length; i++) //sequentially dependent
             {
                 var crv = curves[i];
                 if (!crv.IsClosed) continue;

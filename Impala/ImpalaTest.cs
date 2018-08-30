@@ -16,6 +16,8 @@ namespace Impala
 {
     public static class ImpalaTest
     {
+
+
         /// <summary>
         /// Assert that the partition covers the whole range of branches contiguously
         /// </summary>
@@ -238,7 +240,7 @@ namespace Impala
     
 
 
-    public class ImpalaTester : GH_Component
+    class ImpalaTester : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the ImpalaTest class.
@@ -249,6 +251,8 @@ namespace Impala
               "Category", "Subcategory")
         {
         }
+
+        public override GH_Exposure Exposure => GH_Exposure.hidden;
 
         /// <summary>
         /// Registers all the input parameters for this component.
