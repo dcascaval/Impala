@@ -241,7 +241,7 @@ namespace Impala
             where Q : IGH_Goo
         {
             var result = new GH_Structure<Q>();
-            var partitions = PartitionItems1D(init, granularity);
+            var partitions = Partition(init, granularity, branchGranularity);
             for (int i = 0; i < init.Branches.Count; i++)
             {
                 result.EnsurePath(init.Paths[i]);
@@ -303,12 +303,13 @@ namespace Impala
             var maxbranch = Math.Max(a.Branches.Count, b.Branches.Count);
             var partitions = Partition(a, b, granularity, branchGranularity);
 
-            var paths = PathList2(a, b);
-            
+            var paths = PathList2(a, b);         
             for (int i = 0; i < maxbranch; i++)
             {
                 result.EnsurePath(paths[i]);
             }
+            var rPaths = result.Paths;
+            paths = null;
    
             Parallel.For(0, partitions.Length, p =>
             {
@@ -329,14 +330,14 @@ namespace Impala
                                 Q bx = bb[Math.Min(bb.Count - 1, j)];
                                 temp[j] = error.Validate((ax, bx)) ? action(ax, bx) : default;
                             }
-                            result.AppendRange(temp,paths[i]);
+                            result.AppendRange(temp,rPaths[i]);
                         }
                         else
                         {
                             T ax = ba[0];
                             Q bx = bb[0];
                             R res = error.Validate((ax, bx)) ? action(ax, bx) : default;
-                            result.Append(res, paths[i]);
+                            result.Append(res, rPaths[i]);
                         }
                     }
                 }
