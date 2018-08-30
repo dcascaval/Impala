@@ -40,24 +40,33 @@ A set of test files and extensive benchmarking results provide examples (and, wh
 
 - Current benchmarks are available in `/bench`, and are generated primarily using `bencher.gh`. Standalone benchmark files are also used to test for correctness - a typical benchmark will verify correctness and measure performance against the equivalent native implementation to the Impala functionality. For example, a section of the QuickMath benchmark might look like this:
 
+Flat Input                 |  Random input
+:-------------------------:|:-------------------------:
+![](bench/Flat_BinAdd_Bench.jpg)  |  ![](bench/Random_BinAdd_Bench.jpg)
+
+And in Grasshopper: 
+
 !["QuickMath speedtest benchmark, Arithmetic components"](quickmath_demo.png)
 
 - Preliminary benchmarks indicate that Impala components are as fast as native GH for all input sizes, and significantly faster for any larger input size. Additionally, Impala components are as fast or faster than the multithreaded GH components in GH1. Unlike those components, however, Impala components are optimised against adversarial input patterns, and can significantly outperform the multithreaded GH1 components in many cases:
+
+Against Curve-Curve SingleThreaded  | Against Curve-Curve Multithreaded
+:-------------------------:|:-------------------------:
+![](bench/r6_ccx_Bench.jpg)  |  ![](bench/r6_mtx_flat_Bench.jpg)
+
+A particularly egregious input pattern result:
 
 !["Parallel BLX component benchmark"](parallel_benchmark.png)
 
 ---
 #### Development Milestones (v1.0)
 (see `notes.md` for progress and lessons learned throughout)
-- Testing (Ongoing)
-- Documentation & Icons 
-- Benchmarking (Ongoing)
-
+- Almost complete! Documenting and preparing for release.
 ---
 
 #### Propsed Extensions (v2.0)
 
-- ZUI options
+- ZUI options & FlatMerge
 - Dynamic lambda components and branch-matching
 - Test `Span<T>` and `ImpalaStructure<T> : IGH_Structure` for memory-efficient copy output
 - Profile sub-portions and cache repeat expensive computation
