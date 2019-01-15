@@ -49,7 +49,7 @@ namespace Impala
         public LineComparer(double tolerance)
         {
             this.tolerance = tolerance;
-            this.dLength = -Math.Log10(tolerance * 2);
+            this.dLength = -Math.Log10(tolerance * 2 * Math.Sqrt(3));
             this.tolerance = this.tolerance - this.tolerance + this.tolerance;
         }
 
@@ -72,39 +72,13 @@ namespace Impala
             bool b7 = b1 && b2 && b3;
             bool b8 = b4 && b5 && b6;
             bool b9 = b7 && b8;
-
-            //This shouldn't have to happen
-            //p1 = l1.Line.From;
-            //p2 = l2.Line.To;
-
-            //p3 = l1.Line.To;
-            //p4 = l2.Line.From;
-
-
-            //b1 = Math.Abs(p1.X - p2.X) < t;
-            //b2 = Math.Abs(p1.Y - p2.Y) < t;
-            //b3 = Math.Abs(p1.Z - p2.Z) < t;
-            //b4 = Math.Abs(p3.X - p4.X) < t;
-            //b5 = Math.Abs(p3.Y - p4.Y) < t;
-            //b6 = Math.Abs(p3.Z - p4.Z) < t;
-
-            //b7 = b1 && b2 && b3;
-            //b8 = b4 && b5 && b6;
-            //bool b10 = b7 && b8;
-
-            //return b9 || b10;
             return b9;
         }
 
-        // Who knows if this is a good hash. We'll have to test manually. (Looks like maybe?)
-        // Alternatively, length to 6 digits.
+        // Hashcode must always be same when equal (can also be same when !=)
         public int GetHashCode(LineAndInt line)
         {
-            //var l = line.Line;
-            //Todo: we should compute 
-            return (int) (line.Line.Length * Math.Pow(10,this.dLength));
-            
-            //return (int)(l.FromX * l.FromY - l.ToX * l.ToY) ^ (int)(l.FromZ * l.ToZ);
+            return (int) (line.Line.Length * Math.Pow(10,this.dLength)); 
         } 
     }
 
@@ -175,9 +149,10 @@ namespace Impala
 
 
             // Parallelism strategy follows from a few key observations: 
-            // a) We can flip all lines so that x1 <= x2 and y1 <= y2.; 
-            // b) Integer comparisons are cheap, and good parallel sorts exist for *really* big input sizes. (Further profiling here)
+            // a) We can flip all lines so that x1 <= x2. 
+            // b) Single-value comparisons are cheap, and good parallel sorts exist for *really* big input sizes. (Further profiling here)
             // c) Two lines that are duplicates will round to either the same integer or one adjacent, minimizing communication time. 
+            //    (Actually, we multiply a bunch to distribute the hash values over a wider range, but the principle is there.)
             
             // Therefore: 
             // We pre-process the lines before performing the several floating-point comparisons necessary to actually deduplicate them. 
@@ -185,9 +160,12 @@ namespace Impala
             // entire working set of lines, because of better locality in the problem space.
 
             var resultTree = new GH_Structure<GH_Line>();
+            var debugTree = new GH_Structure<GH_String>();
+
             for (int i = 0; i < lineTree.Branches.Count; i++)
             {
                 resultTree.EnsurePath(lineTree.Paths[i]);
+                debugTree.EnsurePath(lineTree.Paths[i]);
             }
 
 
@@ -198,30 +176,88 @@ namespace Impala
                  var ppx_lines = branch.Select(l => new LineAndInt(l)).OrderBy(l => l.Line.Length).ToArray();
 
                  var partitions = (branch.Count / granularity) + 1;
+                 var differential = tolerance * 2 * Math.Sqrt(3);
 
                  HashSet<LineAndInt>[] results = new HashSet<LineAndInt>[partitions];
+                 (int,int)[] bounds = new (int,int)[partitions];
 
-                 // Alternatively, get the slice separately and use LINQ's distinct operator.
+                 // Alternatively, perform the partitioning sequence sequentially. Depends if it bottlenecks.
                  Parallel.For(0, partitions, j =>
                  {
-                     int minIdx = j * granularity;
+                     int minIdx = j * granularity;    
                      int maxIdx = Min(branch.Count, minIdx + granularity);
 
-                     var dumpset = new HashSet<LineAndInt>(new LineComparer(tolerance));
-                     for (int k = minIdx; k < maxIdx; k++)
+                     bool eliminateInterval = false;
+
+                     
+                     // Forward shift minimum index.
+                     if (j > 0)
                      {
-                         dumpset.Add(ppx_lines[k]);
+                         int tempIdx = minIdx - 1;
+                         int upperBound = Min(maxIdx, branch.Count - 1);
+
+                         int k = tempIdx;
+                         for (; k < upperBound; k++) // Stop, if necessary.
+                         {
+                             if (ppx_lines[k+1].Line.Length - ppx_lines[k].Line.Length > differential)
+                             {
+                                 minIdx = k + 1;
+                                 break;
+                             }
+                         } 
+
+                         if (k == upperBound)
+                         {
+                             minIdx = upperBound;
+                             eliminateInterval = true;
+                         }
+                     } 
+                     
+                     // Increment Maximum Index to workable gap
+                     if (j < partitions - 1 && !eliminateInterval) // Not for the last partition, or for when min == max.
+                     {
+                         int tempIdx = maxIdx - 1;
+                         int upperBound = branch.Count - 1;
+
+                         int k = tempIdx;
+                         for (; k < upperBound; k++) // Stop, if necessary.
+                         {
+                             if (ppx_lines[k + 1].Line.Length - ppx_lines[k].Line.Length > differential)
+                             {
+                                 maxIdx = k + 1;
+                                 break;
+                             }
+                         }
+
+                         if (k == upperBound) // We looped through everything and increased the max IDX.
+                         {
+                             maxIdx = branch.Count;
+                         }
+
+                     }
+
+                     bounds[j] = (minIdx, maxIdx);
+                     
+                     var dumpset = new HashSet<LineAndInt>(new LineComparer(tolerance));
+
+                     if (!eliminateInterval) // Extra borderline cases in last partition.
+                     {
+                         for (int k = minIdx; k < maxIdx; k++)
+                         {
+                             dumpset.Add(ppx_lines[k]);
+                         }
                      }
 
                      results[j] = dumpset; // This mostly deduplicates. Let's see how it works.
-                     // We need something to benchmark against, namely a sequential implementation of the component as in Kangaroo.
                  });
 
-                 
+
                  for (int j = 0; j < partitions; j++)
                  {
-                     resultTree.AppendRange(results[j].Select(l => l.ToLine()),lineTree.Paths[i]);
+                     resultTree.AppendRange(results[j].Select(l => l.ToLine()), lineTree.Paths[i]);
+                     //debugTree.AppendRange(results[j].Select(_ => new GH_String($"{j}, {bounds[j]}")),lineTree.Paths[i]);
                  }
+
              });
 
 
