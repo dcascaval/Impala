@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImpalaMethodGenerator", "ImpalaMethodGenerator.csproj", "{59AAE45C-1BE2-416C-91B5-6141997C2D43}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ImpalaMethodGenFS", "..\ImpalaMethodGenFS\ImpalaMethodGenFS.fsproj", "{699CE825-108B-4F64-B623-7591D9D771B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{59AAE45C-1BE2-416C-91B5-6141997C2D43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59AAE45C-1BE2-416C-91B5-6141997C2D43}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59AAE45C-1BE2-416C-91B5-6141997C2D43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{699CE825-108B-4F64-B623-7591D9D771B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{699CE825-108B-4F64-B623-7591D9D771B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{699CE825-108B-4F64-B623-7591D9D771B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{699CE825-108B-4F64-B623-7591D9D771B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

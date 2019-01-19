@@ -13,6 +13,8 @@ type Expr =
   | Unop  of Unop * Expr
   | Tern  of Expr * Expr * Expr 
   | Construct of CSType * Expr list
+  | Index of Expr * Expr
+  | Property of Expr * string
   | Method of Expr * string * Expr list
   | Call  of string * Expr list
  
@@ -40,6 +42,7 @@ and Conditional = {
 }
 
 and Stmt = 
+  | Simple of Expr
   | DeclAssign of CSType * Expr * Expr
   | Assign of Expr * Expr
   | Condition of Conditional
@@ -150,29 +153,162 @@ let range n =
 let maprange n f =  
   List.map f (range n)
  
-let in_param nth =  
+let get_param_string offset nth =
     let letter n = Char.ConvertFromUtf32 n in
-    Param (String.replicate (nth / 13) (letter (nth % 13)))
-
-let out_param nth = 
-    let letter n = Char.ConvertFromUtf32 n in
-    Param (String.replicate (nth / 13) (letter ((nth % 13) + 13)))
+    String.replicate (nth / 13) (letter ((nth % 13) + offset))
+    
+let in_param_string = get_param_string 13
+let out_param_string = get_param_string 0
+let in_param n = Param (in_param_string n)
+let out_param n = Param (out_param_string n)
 
 let GH_Structure types =
     Composite (Param "GH_Structure", types)
 
+let get_result_types out graft =
+    range out |> List.map (out_param) |> List.map (fun t -> if graft then Array t else t)
+   
+
+let getfnargs zip red out graft =
+    let convert s offset i =
+        let typestr = (in_param_string (i+offset)) in  
+        (Param typestr, (s + typestr).ToLower()) 
+    in
+    let (zip_typ,zip_ts) = range zip |> List.map (convert "zip_"  0)    |> List.unzip   
+    let (rdx_typ,rdx_ts) = range red |> List.map (convert "redux_" zip) |> List.unzip
+    let structures = List.map (fun t -> GH_Structure [t]) (zip_typ @ rdx_typ)
+    let rdx_ls = List.map (fun t -> Composite (Param "List", [t])) rdx_typ 
+    let res_typs = get_result_types out graft in 
+    let func_t = Composite (Param "Func", zip_typ @ rdx_ls @ [Tuple (res_typs)]) 
+    let err_t  = Composite (Param "ErrorChecker", zip_typ @ rdx_ls)
+
+    []
+    
+
 let declareResults n =  
     let result i =
         let var = sprintf "result%d" i in
-        DeclAssign (INFER,Var var,Construct(GH_Structure [out_param i],[]))
+        (DeclAssign (INFER,Var var,Construct(GH_Structure [out_param i],[])),Var var)
     in
-    range n |> List.map result
+    range n |> List.map result |> List.unzip
+
+let callmax name tokens =    
+    [DeclAssign(INFER,Var name,Call("Max",List.map (fun token -> Property (token,"Count")) tokens))]
+
+let getpath tokens =    
+    [DeclAssign(INFER,Var "paths", Call("GetPathList",tokens))]
+
+let branchzip basetoken ziptoken offset n = 
+    let bzips,zips = range n |> List.map (fun i -> let k = in_param_string (i+offset) in Var (basetoken^k),Var (ziptoken^k)) 
+                             |> List.unzip in 
+    let zipexprs = (List.map (fun z -> 
+        Index (Property(z,"Branches"), 
+               Method (Var "Math","Min",
+                   [Var "i";
+                    Binop(SUB, 
+                          Property (Property (z,"Branch"), "Count"), 
+                          IConst 1)
+                   ])
+              )
+       ) zips) in 
+    List.map2 (fun b z -> (DeclAssign(INFER,b,z),b)) bzips zipexprs |> List.unzip
+
+let ensurepaths = 
+    List.map (fun t -> Simple(Method(t,"EnsurePath",[Var "targpath"]))) 
+   
+let appendranges =
+    List.mapi (fun i t -> 
+        let item = (sprintf ("Item%d") i) in
+        Simple(Method(t,"AppendRange",[Property(Var "compute",item);Var "targpath"])))
+
+let allcountszero tokens = 
+    let count_tokens = List.map (fun tk -> Property(tk,"Count")) tokens in
+    match count_tokens with 
+    | [] -> BConst true
+    | x :: xs -> List.fold (fun expr tk -> Binop(AND,expr,tk)) x xs
+
+let getbranchitem = 
+    List.map2 (fun z b ->
+        let z' = match z with
+                 | Var s -> Var (s + "x")
+                 | _ -> raise (Failure "Non-var token in getbranchitem")
+        in
+        DeclAssign(INFER,z',
+             Index (b, 
+               Method (Var "Math","Min",
+                   [Var "j";
+                    Binop(SUB, 
+                          Property (b, "Count"), 
+                          IConst 1)
+                   ])
+              )
+        )
+    )
+       
+let getcompute tokens = []
+    
+
+let generateFunction zip redx out graft =   
+    
+
+    let (declresult_stmts,declresult_tokens) = declareResults (out + graft) in 
+    let (branchzip_stmts,branchzip_tokens) = branchzip "branchzip" "zip" 0 zip in
+    let (rdxzip_stmts,rdxzip_tokens) = branchzip "rxbranchredux" "redux" zip redx in 
+    
+    List.concat [
+        declresult_stmts;
+        callmax "maxbranch" declresult_tokens; // Wrong tokens use args here
+        getpath declresult_tokens;
+
+        [Loop { 
+            variable = Var "i";
+            start = IConst 0; stop = Var "maxbranch"; stride = IConst 1;
+            body = List.concat [
+                [DeclAssign (INFER,Var "path",Call("GetPath",[Var "paths";Var "i"]))];
+                branchzip_stmts;
+                callmax "maxlen" branchzip_tokens;
+                
+                [Loop {
+                  variable = Var "j";
+                  start = IConst 0; stop = Var "maxlen"; stride = IConst 1;
+                  body = 
+                    DeclAssign(INFER,Var "targpath",
+                               Method(Var "path","AppendElement",[Var "j"])) :: 
+                    ensurepaths declresult_tokens 
+                }]
+            ]
+        }]
+
+        [Parallel {
+            variable = Var "i";
+            start = IConst 0; stop = Var "maxbranch"; stride = IConst 1;
+            body = List.concat [
+                [DeclAssign (INFER,Var "path",Call("GetPath",[Var "paths";Var "i"]))];
+                branchzip_stmts;
+                rdxzip_stmts;
+                
+                [Condition {
+                  case = allcountszero (branchzip_tokens @ rdxzip_tokens);  
+                  _if = List.concat [
+                    callmax "maxlen" branchzip_tokens;
+                    
+                    [Parallel { 
+                        variable = Var "j";
+                        start = IConst 0; stop = Var "maxlen"; stride = IConst 1;
+                        body = List.concat [
+                            getbranchitem branchzip_tokens;
+
+                            [DeclAssign (INFER,Var "path",Call("GetPath",[Var "paths";Var "i"]))];
+                            appendranges declresult_tokens;
+                        ];
+                    }]
 
 
-// let red1x1 rdx out = 
-//   let s = sprintf in 
-//   let results = maprange rdx (fun i -> Var (s"redux_t%d" i) ) in 
-  
-//   let decls = List.map (fun r -> DeclareAssign (INFER,r,Composite(Param "GH_Structure",[Param "A"]))) results in 
-//   []
 
+                  ]; 
+                  _else = None;
+                }]
+
+                ]
+        }]
+    ]
