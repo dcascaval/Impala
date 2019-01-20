@@ -48,6 +48,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
+    <Compile Include="Bindings.fs" />
     <Compile Include="ImpalaMethodGen.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
