@@ -16,7 +16,7 @@ open Bindings
         action_token : Expr;
         error_type : CSType;
         error_token : Expr;
-        in_types : CSType list;
+        all_types : CSType list;
     }
     
     // Shortcut to create a GH_Structure type.
@@ -72,7 +72,7 @@ open Bindings
         let rdx_ls = List.map (fun t -> Composite (Param "List", [t])) rdx_types
         let res_typs = restypes out graft 
         let func_t = Composite (Param "Func", zip_types @ rdx_ls @ [TTuple (res_typs)]) 
-        let err_t  = Composite (Param "ErrorChecker", zip_types @ rdx_ls)
+        let err_t  = Composite (Param "ErrorChecker", [TTuple(zip_types @ rdx_ls)])
         { 
           zip_types = zip_strs;
           zip_tokens = zip_tokens;
@@ -82,7 +82,7 @@ open Bindings
           action_token = Var "action";
           error_type = err_t;
           error_token = Var "error";
-          in_types = zip_types @ rdx_types;
+          all_types = zip_types @ rdx_types @ (restypes out false); // We just want the type parameters, not the arrays.
         }
 
     // Initialize the results (var result1 = new GH_Structure<A>())
@@ -121,22 +121,42 @@ open Bindings
   
     // Call appendRange on a list of tree tokens.
     // ex: result1.AppendRange(compute.Item1,targpath);
-    let AppendRanges src_tok path_tok =
-        List.mapi (fun i t -> 
-            let item = (sprintf ("Item%d") (i+1)) in
-            Simple(Method(t,"AppendRange",[Property(src_tok,item);path_tok])))
+    let AppendRanges src_tok path_tok multiple res_tokens =
+        let method = if multiple then "AppendRange" else "Append"
+        if List.length res_tokens > 1 then 
+            res_tokens |>
+            List.mapi (fun i t -> 
+                let item = (sprintf ("Item%d") (i+1)) in
+                Simple(Method(t,method,[Property(src_tok,item);path_tok])))
+        else 
+            res_tokens |> 
+            List.mapi (fun i t ->
+                Simple(Method(t,method,[src_tok;path_tok])))
     
     // Call our modified appendRange w/ a linq query 
     // ex: result1.AppendRange(from item in temp select item.Item1, path);
-    // Don't call this when the tuple has only one item.
-    let AppendRangeSelects sel_token path_token = 
-        List.mapi (fun i t ->
-          let item = sprintf ("Item%d") (i + 1) in
-          Simple(Method(t,"AppendRange",[
-            Method(sel_token,"Select",[Lambda(Var "item",Property (Var "item",item))]);
-            path_token
-          ]))
-        )
+    let AppendRangeSelects sel_token path_token multiple res_tokens =
+        let method = if multiple then "AppendRange" else "Append"
+        if List.length res_tokens > 1 then
+            if multiple then 
+                res_tokens |>
+                List.mapi (fun i t ->
+                  let item = sprintf ("Item%d") (i + 1) in
+                  Simple(Method(t,method,[
+                    Method(sel_token,"Select",[Lambda(Var "item",Property (Var "item",item))]);
+                    path_token
+                  ])))
+             else
+                res_tokens |> 
+                List.mapi (fun i t ->
+                  let item = sprintf ("Item%d") (i + 1) in
+                  Simple(Method(t,method,[Property (sel_token,item); path_token]))
+                )
+        else 
+           res_tokens |>
+           List.mapi (fun i t ->
+              Simple(Method(t,method,[sel_token; path_token]))) 
+
     
     // Composed conditional expression that checks for non-zero branch lenghths.
     // ex: (branchzip_t.Count > 0 && rxbranchredux_r.Count > 0)
@@ -152,8 +172,8 @@ open Bindings
     let DeclareBranchItems zippy branchy = 
         let mapping zip brnch = 
             let zip' = match zip with
-                     | Var s -> Var (s + "x")
-                     | _ -> raise (Failure "Non-var token in DeclareBranchItems")
+                        | Var s -> Var (s + "x")
+                        | _ -> raise (Failure "Non-var token in DeclareBranchItems")
             in
             let decl = DeclAssign(INFER,zip',
                          Index (brnch, 
@@ -172,17 +192,23 @@ open Bindings
        
     // Create the final computation expression inside the inner loop.
     // ex: error.Validate((zip_tx, rxbranchredux_u)) ? action(zip_tx, rxbranchredux_u) : (new A[0]) // OR : default
-    let ComputeExpression dest tokens res_typs graft = 
-        [DeclAssign(INFER,dest,
-            Ternary(
-               Method(Var "error","Validate",[ExpTuple tokens]),
-               Call("action",tokens),
-               (if graft then
-                    ExpTuple (List.map (fun t -> ConstrArray(t,IConst 0)) res_typs)
-               else 
-                    Var "default")
-            )
-        )]
+    let ComputeExpression dest tokens res_typs graft decl = 
+        let compute = 
+            Ternary( Method(Var "error","Validate",[ExpTuple tokens]),
+                     Call("action",tokens),
+                           (if graft then
+                                ExpTuple (List.map (fun t -> ConstrArray(t,IConst 0)) res_typs)
+                           else 
+                                Var "default"))
+        if not decl then
+            [DeclAssign(INFER,dest,compute)]
+        else
+            [Assign(dest,compute)]
+           
+
+    //
+    // CODE SKELETON
+    //
 
     // Big ol' generator.
     // Zip, Redx, Out specify the arity in each dimension
@@ -208,19 +234,29 @@ open Bindings
             [Loop { 
                 variable = Var "i";
                 start = IConst 0; stop = Var "maxbranch"; stride = IConst 1;
-                body = List.concat [
-                    [DeclAssign (INFER,Var "path",Call("GetPath",[Var "paths";Var "i"]))];
-                    declbranchzip_stms;
-                    CallMaxCount "maxlen" branchzip_tokens;
+                body = 
+                    DeclAssign (INFER,Var "path",Call("GetPath",[Var "paths";Var "i"])) :: 
+
+                    (if zip > 0 then
+                         List.concat [
+                            declbranchzip_stms
+                            CallMaxCount "maxlen" branchzip_tokens
+                    
+                            [Loop {
+                            variable = Var "j";
+                            start = IConst 0; stop = Var "maxlen"; stride = IConst 1;
+                            body = DeclAssign(INFER,Var "targpath",
+                                    Method(Var "path","AppendElement",[Var "j"])) :: 
+                                    EnsurePaths (Var "targpath") result_toks 
+                            }]
+                         ]
+                    else
+                        DeclAssign(INFER,Var "targpath",
+                                    Method(Var "path","AppendElement",[IConst 0])) :: 
+                                    EnsurePaths (Var "targpath") result_toks 
+                        
+                    )
                 
-                    [Loop {
-                        variable = Var "j";
-                        start = IConst 0; stop = Var "maxlen"; stride = IConst 1;
-                        body = DeclAssign(INFER,Var "targpath",
-                                Method(Var "path","AppendElement",[Var "j"])) :: 
-                                EnsurePaths (Var "targpath") result_toks 
-                    }]
-                ]
             }];
             empty;
 
@@ -235,32 +271,45 @@ open Bindings
                     [Condition {
                         case = AllCountZeroExpr (branchzip_tokens @ rdxzip_tokens);  
                         _if = List.concat [
-                            CallMaxCount "maxlen" branchzip_tokens;
-                         
-                            (if graft then
-                                [Parallel { 
-                                    variable = Var "j";
-                                    start = IConst 0; stop = Var "maxlen"; stride = IConst 1;
-                                    body = List.concat [
-                                        declbritem_stms;
-                                        ComputeExpression (Var "compute") (britem_tokens @ rdxzip_tokens) (result_typs) graft;
-                                        [DeclAssign (INFER,Var "targpath",Method(Var "path","AppendElement",[Var "j"]))];
-                                        AppendRanges (Var "compute") (Var "targpath") result_toks;
-                                    ];
-                                }] 
-                             else
-                                List.concat [
-                                    [DeclAssign (INFER,Var "temp",ConstrArray(TTuple(result_typs),Var"maxlen"));
-                                     Parallel {
-                                        variable = Var "j"; 
+                            (if zip > 0 then // This is the main case.
+                                CallMaxCount "maxlen" branchzip_tokens @
+                                (if graft then
+                                    [Parallel { 
+                                        variable = Var "j";
                                         start = IConst 0; stop = Var "maxlen"; stride = IConst 1;
                                         body = List.concat [
                                             declbritem_stms;
-                                            ComputeExpression (Index(Var "temp",Var "j")) (britem_tokens @ rdxzip_tokens) (result_typs) graft;
-                                        ]
-                                     }]; 
-                                    AppendRangeSelects (Var "temp") (Var "path") result_toks;
-                                ]
+                                            ComputeExpression (Var "compute") (britem_tokens @ rdxzip_tokens) (result_typs) graft false;
+                                            [DeclAssign (INFER,Var "targpath",Method(Var "path","AppendElement",[Var "j"]))];
+                                            AppendRanges (Var "compute") (Var "targpath") true result_toks;
+                                        ];
+                                    }] 
+                                 else
+                                    List.concat [
+                                        [DeclAssign (INFER,Var "temp",ConstrArray(TTuple(result_typs),Var"maxlen"));
+                                         Parallel {
+                                            variable = Var "j"; 
+                                            start = IConst 0; stop = Var "maxlen"; stride = IConst 1;
+                                            body = List.concat [
+                                                declbritem_stms;
+                                                ComputeExpression (Index(Var "temp",Var "j")) (britem_tokens @ rdxzip_tokens) (result_typs) graft true;
+                                            ]
+                                         }]; 
+                                        AppendRangeSelects (Var "temp") (Var "path") true result_toks;
+                                    ])
+                            else  //If we happen to have no zips, we don't need an inner nested loop...
+                                (if graft then
+                                    List.concat [
+                                        ComputeExpression (Var "compute") (rdxzip_tokens) (result_typs) graft false;
+                                        [DeclAssign (INFER,Var "targpath",Method(Var "path","AppendElement",[IConst 0]))];
+                                        AppendRanges (Var "compute") (Var "targpath") true result_toks;
+                                    ]
+                                else
+                                    List.concat [
+                                        ComputeExpression (Var "temp") (rdxzip_tokens) (result_typs) graft false;
+                                        AppendRangeSelects (Var "temp") (Var "path") false result_toks;
+                                    ]
+                                )
                             )
                         ]; 
                         _else = None;
@@ -280,7 +329,54 @@ open Bindings
           name = sprintf "%s%sx%s%d" (AppendNonZero "Zip" zip) (AppendNonZero "Red" redx) (if graft then "Graft" else "") out;
           typ = TTuple (List.map (fun t -> GH_Structure [t]) result_typs);
           args = ListifyArgs args 
-          parameters = args.in_types
-          constraints = List.map (fun t -> (t,Param "IGH_Goo")) args.in_types;
+          parameters = args.all_types
+          constraints = List.map (fun t -> (t,Param "IGH_Goo")) args.all_types;
           body = fn_body;
         }    
+ 
+    // Generate all combinations of possible arities into a lazily-evaluated sequency
+    let GenerateMethods zip red out = 
+        let zseq = Seq.init zip id
+        let rseq = Seq.init red id
+        let out = Seq.init out (fun i -> i + 1) 
+        Seq.map (fun zip -> 
+            Seq.map (fun rdx -> 
+                Seq.map (fun out ->
+                    if zip + rdx > 0 then // Don't print when both 0
+                        [GenerateFunction zip rdx out true;
+                         GenerateFunction zip rdx out false]
+                        |> Seq.ofList
+                    else Seq.empty
+                ) out // Don't want 0 outputs, that seems truly pointless.
+            ) rseq // We want to be able to have 0 zips & redxs
+        ) zseq
+        |> Seq.concat |> Seq.concat |> Seq.concat
+    
+    // Create the whole methodgen skeleton.
+    let GenerateProgram zip red out = 
+        let usings = [ Using (["System"],[])
+                       Using (["System";"Linq"],[])
+                       Using (["System";"Text"],[])
+                       Using (["System";"Threading";"Tasks"],[])
+                       Using (["System";"Collections";"Generic"],[])
+                       EMPTY_STM
+                       Using (["Grasshopper";"Kernel"],[])
+                       Using (["Grasshopper";"Kernel";"Data"],[])
+                       Using (["Grasshopper";"Kernel";"Types"],[])
+                       EMPTY_STM
+                       Using (["Impala";"Utilities"],["static"])
+                       EMPTY_STM ]
+        in
+        let methodSeq = GenerateMethods zip red out
+        let generated = 
+           Class {
+            modifiers = ["public";"static"]
+            name = "Generated"
+            body = methodSeq
+           }
+        let comment = BlockComment([
+            "THESE METHODS ARE ENTIRELY GENERATED.";
+            "Any changes made to this file will be overwritten when it is regenerated.";
+            "To make any changes, modify the code in the ImpalaMethodGenerator project.";])
+        let nmspace = Namespace("Impala",[comment;generated])
+        usings @ [nmspace] 

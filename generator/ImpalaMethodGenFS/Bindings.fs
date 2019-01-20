@@ -1,5 +1,6 @@
 ﻿module Bindings
 
+open System.IO
     // Internal Representation for generating C# programmably. 
     
     // These are good for C# in general, not just Impala methods. They don't
@@ -80,12 +81,24 @@
       body : Stmt list;
     }
 
+    and Class = {
+      modifiers : string list
+      name : string
+      body : Function seq            // Could be quite large. Let's have this one be lazy
+    }
 
+    type GStmt =
+      | EMPTY_STM // For formatting
+      | Class of Class
+      | BlockComment of string list
+      | Using of string list * string list // modifier list * namespace list
+      | Namespace of string * GStmt list
 
-
+    type Program = GStmt list
 
     // Type Formatters! Pretty print exprs, statements, the whole deal.
-    
+    let space = "    " // 4-spaces. No tabs.
+
     let FmtBinop = function 
       | ADD -> "+"
       | SUB -> "-"
@@ -137,11 +150,11 @@
       | Composite (typ,typs) -> sprintf "%s<%s>" (FmtType typ) (typs |> List.map FmtType |> String.concat ",")
 
     let rec FmtStmt indent stm =
-      let next = indent + "  " 
+      let next = indent + space
       let fmtblk b = FmtStmt indent (Block b) 
       let formatted = 
         (match stm with
-        | EMPTY -> "\n"
+        | EMPTY -> ""
         | Simple e -> (FmtExpr e) + ";"
         | DeclAssign (t,v,e) -> sprintf "%s %s = %s;" (FmtType t) (FmtExpr v) (FmtExpr e)
         | Assign (v,e) -> sprintf "%s = %s;" (FmtExpr v) (FmtExpr e)
@@ -171,18 +184,44 @@
        indent + formatted
     
     let FmtConstraints indent constrs = 
-      let (a,b) = List.splitAt ((List.length constrs) / 2) (constrs)
       let fmt (param,constr) = sprintf "where %s : %s" (FmtType param) (FmtType constr)
-      let a' = String.concat "  " (List.map fmt a)
-      let b' = String.concat "  " (List.map fmt b)
-      indent + a' + "\n" + indent + b' + "\n"
+      let strs = String.concat "  " (List.map fmt constrs)
+      (if List.length constrs > 0 then indent + strs else "") 
 
-    let FmtFunction (func : Function) = 
-      let space = "    "
+    let FmtFunction indent (func : Function) = 
+      let space' = indent + space
       let args = func.args |> List.map (fun (t,s) -> FmtType t + " " + (FmtExpr s)) |>  String.concat ", " 
       let mods = String.concat " " func.modifiers
-      let cons = FmtConstraints space func.constraints
-      let pars = func.parameters |> List.map FmtType |> String.concat "," |> (fun s -> "<" + s + ">")
-      let sign = sprintf "%s %s %s<%s>\n(%s)\n%s" mods (FmtType func.typ) (func.name) pars args cons 
-      let body = FmtStmt space (Block func.body) 
-      sign + body
+      let cons = FmtConstraints space' func.constraints
+      let pars = func.parameters |> List.map FmtType |> String.concat "," 
+      let sign = sprintf "%s %s %s<%s>\n%s(%s)\n%s" mods (FmtType func.typ) (func.name) pars indent args cons 
+      let body = FmtStmt (space') (Block func.body) 
+      indent + sign + body + "\n\n"
+    
+    let rec PrintGstmt printer indent = function 
+      | EMPTY_STM -> printer ("\n")
+      | Using (quals,mods) -> 
+            let mods' = if List.length mods > 0 then (String.concat " " mods + " ") else ""
+            printer (indent + sprintf ("using %s%s;\n") (mods') (String.concat "." quals))
+      | BlockComment (comments) ->
+            let fmtc c = indent + sprintf "/// %s" c
+            let lines =  indent + "///<summary>" :: List.map fmtc comments @ [indent + "///</summary>"]
+            printer (String.concat "\n" lines + "\n")
+      | Class (cdefn) ->
+            let signature = cdefn.modifiers @ ["class";cdefn.name] |> String.concat " "
+            let start = indent + signature + "\n" + indent + "{\n\n"
+            let finish = "\n" + indent + "}\n" 
+            printer start;
+            Seq.iter (fun fn -> printer (FmtFunction (indent + space) fn)) cdefn.body;
+            printer finish;
+      | Namespace (name,stms) -> 
+            let name = indent + "namespace " + name + "\n" + indent + "{\n"
+            let finish = "\n" + indent + "}" 
+            printer (name)
+            List.iter (PrintGstmt printer (indent + space)) stms
+            printer (finish)
+            
+    let PrintProgram filename (program : Program) = 
+        let fprint s = File.AppendAllText(filename,s) in 
+        List.iter (PrintGstmt fprint "") program
+                 
