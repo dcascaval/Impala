@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ImpalaMethodGenFS", "..\ImpalaMethodGenFS\ImpalaMethodGenFS.fsproj", "{699CE825-108B-4F64-B623-7591D9D771B4}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ImpalaMethodGenerator", "ImpalaMethodGenerator.fsproj", "{699CE825-108B-4F64-B623-7591D9D771B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

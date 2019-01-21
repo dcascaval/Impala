@@ -8,11 +8,11 @@
     <ProjectGuid>699ce825-108b-4f64-b623-7591d9d771b4</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>ImpalaMethodGenFS</RootNamespace>
-    <AssemblyName>ImpalaMethodGenFS</AssemblyName>
+    <AssemblyName>ImpalaMethodGenerator</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <UseStandardResourceNames>true</UseStandardResourceNames>
-    <Name>ImpalaMethodGenFS</Name>
+    <Name>ImpalaMethodGenerator</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,7 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).XML</DocumentationFile>
+    <DocumentationFile>bin\Release\ImpalaMethodGenerator.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
@@ -49,7 +49,7 @@
     <None Include="App.config" />
     <Content Include="packages.config" />
     <Compile Include="Bindings.fs" />
-    <Compile Include="ImpalaMethodGen.fs" />
+    <Compile Include="Generator.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
