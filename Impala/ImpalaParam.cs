@@ -22,8 +22,22 @@ using System.Windows.Forms;
 namespace Impala
 {
 
-  // We decompiled GH_Param<T>. 
-  // This is what we found.
+  // We will, in fact, have to learn _exactly_ how Grasshopper does what it's doing in order to provide our own parameter implementation
+  // that maintains the pre-allocated, sorted invariants we're looking for. Additionally, we should look at what happens when something
+  // comes _in_ to the component, and if there's any way we can define a separate interface. Our ImpalaComponent doesn't have to replicate 
+  // the entire GH_Component interface - in fact, it's probably a good idea to keep it a lot simpler, which we can do because we remove
+  // our restriction on having things be: 
+  //  a) at a high-level data structure (ILists)
+  //  b) generic and auto-casty
+  //  c) particularly amenable to intermixing items, lists, trees, etc. in anything other than broadcast semantics
+  // 
+  // All of this comes in because we want to change the fundamental data structure backing behind the param, and adjust 
+  // the logic of how it merges in order to take advantage of precomputing the allocated space needed.  
+  // So off we go.
+  // 
+  // Things that still need to be accomplished:
+  // - PersistentParam<T>
+  // - GeometricParam<T>
   abstract class ImpalaParam<T> : GH_ActiveObject, IGH_Param, IGH_ParamWithPostProcess where T : class, IGH_Goo
   {
     public bool SetTree(ImpalaStructure<T> tree) { return false; }

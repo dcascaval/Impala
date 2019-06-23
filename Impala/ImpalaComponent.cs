@@ -63,12 +63,12 @@ namespace Impala
       // Todo - this constructor isn't quite done.
     }
 
-    //Conversion Function is going to require runtime types.It'll have to happen in the Get() func.
+    //Conversion Function is going to require runtime types. It'll have to happen in the Get() func.
     public ImpalaStructure<T> MakeImpalaStructure<T>(IGH_Structure tree) where T : IGH_Goo
     {
       if (tree is ImpalaStructure<T>) return (ImpalaStructure<T>)tree;
 
-      // Do this
+      // Todo: Do this
       return null;
     }
 
@@ -152,9 +152,9 @@ namespace Impala
 
 
   // We can sort of do it by selectively overriding the methods we need in GH_Component.
-  abstract class ImpalaSubComponent : GH_Component
+  abstract class ImpalaComponent : GH_Component
   {
-    public ImpalaSubComponent(string name, string nickname, string description, string category, string subcategory)
+    public ImpalaComponent(string name, string nickname, string description, string category, string subcategory)
     : base(name, nickname, description, category, subcategory)
     {
     }
@@ -208,7 +208,6 @@ namespace Impala
     }
 
 
-
     public override void ComputeData()
     {
       if (Locked)
@@ -238,8 +237,6 @@ namespace Impala
       Params.Output.DoEach(p => p.Phase = GH_SolutionPhase.Computed);
       if (TryWith(BeforeSolveInstance, "Before Solution Exception"))
       {
-
-
 
         // Check that everything has its shit together. 
         var hasData = Params.All(p => p.Optional || !p.VolatileData.IsEmpty);
@@ -272,275 +269,8 @@ namespace Impala
   }
 
 
-
-  // ImpalaStructure for basic conversion operations. We should allow this to be made in/out of GH_Structure <T>
-  public class ImpalaStructure<T> : IGH_Structure, IEnumerable<T>, GH_ISerializable where T : IGH_Goo
-  {
-    int numBranches;
-    int[] sizePerBranch;
-
-    GH_Path[] paths;
-    int[][] data;
-    int totalSize;
-
-    // We'll try to keep path info consistent. We fully one-shot the allocation here
-    // in order to save us a whole load of time when it comes to the .Add() methods.
-    public ImpalaStructure(int numBranches, int[] sizePerBranch, GH_Path[] paths)
-    {
-
-      // We save everything here.
-      this.numBranches = numBranches;
-      this.sizePerBranch = sizePerBranch;
-      this.paths = paths;
-      this.data = new int[numBranches][];
-
-      int total = 0;
-      for (int i = 0; i < numBranches; i++)
-      {
-        int size = sizePerBranch[i];
-        total += size;
-        data[i] = new int[size];
-      }
-
-      totalSize = total;
-    }
-
-    // Standard data structure operations
-    public bool IsEmpty => totalSize == 0;
-    public int PathCount => numBranches;
-    public int DataCount => totalSize;
-    public IList<GH_Path> Paths => paths;
-
-    public string TopologyDescription
-    {
-      get
-      {
-        if (totalSize == 0) return "empty data";
-        return $"Data with {numBranches} branches";
-        //@TODO: add the rest of the string in a builder. (sizeperbranch info).
-      }
-    }
-
-    public IGH_StructureEnumerator AllData(bool skipNulls)
-    {
-      throw new NotImplementedException();
-    }
-
-    // What this
-    public string DataDescription(bool includeIndices, bool includePaths)
-    {
-      throw new NotImplementedException();
-    }
-
-    // Also, what this
-    public void ExpandPath(GH_Path path, int element, GH_ExpandMode mode)
-    {
-      throw new NotImplementedException();
-    }
-
-
-    // Warning: not efficient.
-    public IList get_Branch(GH_Path path)
-    {
-      // We don't key by path.
-      // We Introduce: A Level Of Indirection.
-      // branch -> table -> index -> data[index]
-      return null;
-    }
-
-    public IList get_Branch(int index)
-    {
-      return data[index];
-    }
-
-    public GH_Path get_Path(int index)
-    {
-      return paths[index];
-    }
-
-    public int LongestPathIndex()
-    {
-      GH_Path maxPath = null;
-      int max = 0;
-      for (int i = 0; i < numBranches; i++)
-      {
-        if (maxPath == null || maxPath.Length < paths[i].Length)
-        {
-          maxPath = paths[i];
-          max = i;
-        }
-      }
-
-      return max; // The actual index, not the path itself.
-    }
-
-    public bool PathExists(GH_Path path)
-    {
-      foreach (var gpath in paths)
-      {
-        if (gpath.IsCoincident(path)) return true;
-      }
-      return false;
-    }
-
-    public void PathIndex(GH_Path path, ref int idx0, ref int idx1)
-    {
-      throw new NotImplementedException();
-    }
-
-    public int ShortestPathIndex()
-    {
-      GH_Path minPath = null;
-      int min = 0;
-      for (int i = 0; i < numBranches; i++)
-      {
-        if (minPath == null || minPath.Length > paths[i].Length)
-        {
-          minPath = paths[i];
-          min = i;
-        }
-      }
-
-      return min; // The actual index, not the path itself.
-    }
-
-
-
-
-    // We have to implement these, since we're passing our thing to the output parameter.
-    // And people want to do operations with that! Hahahahahah wellp. 
-    // This is, I suppose, why we write our own ParamServers. But that's in the weeds.
-
-    public void Flatten(GH_Path path = null) { }
-    public void Simplify(GH_SimplificationMode mode) { }
-    public void Graft(bool clearSingleNulls) { }
-    public void Graft(GH_Path path, bool clearSingleNulls) { }
-    public void Graft(GH_GraftMode mode) { }
-    public void Graft(GH_GraftMode mode, GH_Path path) { }
-
-
-
-    // METHODS THAT WE DON'T WANT TO IMPLEMENT BECAUSE IT DOESN'T MAKE SENSE
-
-    // You don't wanna clear this.
-    public void Clear() { }
-
-    // You don't wanna clear this.
-    public void ClearData() { }
-
-    // Capacity has been ensured. Pray we do not ensure it further.
-    public void EnsureCapacity(int capacity) => throw new NotImplementedException();
-
-    // If you didn't want it, don't allocate it.
-    public void TrimExcess() { }
-
-    // If you didn't want it, don't put it there.
-    public void RemovePath(GH_Path path) { }
-
-    // Really.
-    public void ReplacePath(GH_Path find, GH_Path replace) { }
-
-    // Yo, what up with this? Serializers? 
-    public IList<IList> StructureProxy => throw new NotImplementedException();
-
-
-
-    // GH_ISerializable Implementation
-    public bool Read(GH_IReader reader)
-    {
-      throw new NotImplementedException();
-    }
-
-    public bool Write(GH_IWriter writer)
-    {
-      throw new NotImplementedException();
-    }
-
-
-
-
-    // IEnumerable implementation 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-      throw new NotImplementedException();
-    }
-
-    public IEnumerator<T> GetEnumerator()
-    {
-      throw new NotImplementedException();
-    }
-
-  }
-
-  // We will, in fact, have to learn _exactly_ how Grasshopper does what it's doing in order to provide our own parameter implementation
-  // that maintains the pre-allocated, sorted invariants we're looking for. Additionally, we should look at what happens when something
-  // comes _in_ to the component, and if there's any way we can define a separate interface. Our ImpalaComponent doesn't have to replicate 
-  // the entire GH_Component interface - in fact, it's probably a good idea to keep it a lot simpler, which we can do because we remove
-  // our restriction on having things be: 
-  //  a) at a high-level data structure (ILists)
-  //  b) generic and auto-casty
-  //  c) particularly amenable to intermixing items, lists, trees, etc.
-  // 
-  // All of this comes in because we want to change the fundamental data structure backing behind the param. 
-  // So off we go.
-  //abstract class ImpalaParam<T> : GH_ActiveObject, IGH_Param, IGH_ParamWithPostProcess where T : class, IGH_Goo
-  //{
-  //  protected ImpalaParam(IGH_InstanceDescription Tag) : base(Tag)
-  //  {
-  //  }
-
-  //  protected ImpalaParam(string sName, string sAbbreviation, string sDescription, string sCategory, string sSubCategory) : base(sName, sAbbreviation, sDescription, sCategory, sSubCategory)
-  //  {
-  //  }
-
-  //  public abstract GH_ParamKind Kind { get; }
-  //  public abstract GH_ParamData DataType { get; }
-  //  public abstract Type Type { get; }
-  //  public abstract string TypeName { get; }
-  //  public abstract GH_StateTagList StateTags { get; }
-  //  public abstract GH_ParamWireDisplay WireDisplay { get; set; }
-  //  public abstract bool Optional { get; set; }
-  //  public abstract GH_DataMapping DataMapping { get; set; }
-  //  public abstract GH_ParamAccess Access { get; set; }
-  //  public abstract bool Reverse { get; set; }
-  //  public abstract bool Simplify { get; set; }
-
-
-  //  public abstract IList<IGH_Param> Sources { get; }
-  //  public abstract int SourceCount { get; }
-  //  public abstract bool HasProxySources { get; }
-  //  public abstract int ProxySourceCount { get; }
-  //  public abstract IList<IGH_Param> Recipients { get; }
-  //  public abstract int VolatileDataCount { get; }
-  //  public abstract IGH_Structure VolatileData { get; }
-
-  //  public abstract void AddSource(IGH_Param source);
-  //  public abstract void AddSource(IGH_Param source, int index);
-
-  //  public bool AddVolatileData(GH_Path path, int index, object data) { return false; } // Just don't do it
-  //  public bool AddVolatileDataList(GH_Path path, IEnumerable list)   { return false; } // Or this either 
-  //  public bool AddVolatileDataTree(IGH_Structure tree)               { return false; } // Or, really, this.
-
-  //  public abstract void ClearProxySources(); 
-  //  public abstract void CreateProxySources();
-  //  public abstract bool RelinkProxySources(GH_Document document);
-  //  public abstract void RemoveAllSources();
-  //  public abstract void RemoveEffects();
-  //  public abstract void RemoveSource(IGH_Param source);
-  //  public abstract void RemoveSource(Guid source_id);
-  //  public abstract void ReplaceSource(IGH_Param old_source, IGH_Param new_source);
-  //  public abstract void ReplaceSource(Guid old_source_id, IGH_Param new_source);
-
-  //  public void PostProcessData()
-  //  {
-  //    // Flatten, Graft, Yadda Yadda
-  //  }
-
-
-  //}
-
-
-  class ImpalaStructureTester : ImpalaSubComponent
+  // A small test component to verify that everything, you know, still works.
+  class ImpalaStructureTester : ImpalaComponent
   {
     public ImpalaStructureTester(string name, string nickname, string description, string category, string subcategory)
         : base(name, nickname, description, category, subcategory)
