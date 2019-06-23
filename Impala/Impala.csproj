@@ -62,7 +62,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\BendPlanner.cs" />
+    <Compile Include="Components\CatmullRom.cs" />
+    <Compile Include="Components\GenPermutations.cs" />
+    <Compile Include="Components\ParDrawMesh.cs" />
     <Compile Include="Components\ParRemDupLns.cs" />
+    <Compile Include="Components\PolyArc.cs" />
+    <Compile Include="Components\Robot.cs" />
+    <Compile Include="Components\RRTSolver.cs" />
     <Compile Include="Components\Stopwatch.cs" />
     <Compile Include="Components\HaltonSequence.cs" />
     <Compile Include="Components\ParBLX.cs" />

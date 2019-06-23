@@ -12,7 +12,7 @@ using Grasshopper.Kernel.Types;
 namespace Impala
 {
     public static class Utilities
-    {
+    { 
         public static int Max(params int[] nums)
         {
             return nums.Max();
@@ -23,9 +23,23 @@ namespace Impala
             return nums.Min();
         }
 
+        public static bool AEQ(double a, double b)
+        {
+          return Math.Abs(b - a) <= 1e-8;
+        }
+
         public static IEnumerable<int> IRange(int start, int end)
         {
             return Enumerable.Range(start, end - start);
+        }
+
+        public static Point3d OffsetNormal(this Curve crv, double t, double length, Plane plane)
+        {
+            var pt = crv.PointAt(t);
+            var tan = crv.TangentAt(t);
+            tan.Rotate(Math.PI / 2.0, plane.ZAxis);
+            tan.Unitize(); tan *= length;
+            return pt + tan;
         }
 
         public static IEnumerable<Q> SelEach<T, Q>(this IEnumerable<T> collection, Func<T, int, Q> action)
@@ -38,6 +52,11 @@ namespace Impala
                 i++;
             }
             return result;
+        }
+
+        public static T Last<T>(this List<T> coll)
+        {
+            return coll[coll.Count() - 1];
         }
 
         public static T[] Array<T>(params T[] items)
