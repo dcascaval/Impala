@@ -87,10 +87,12 @@
     <Compile Include="Components\ParVisualCenter.cs" />
     <Compile Include="Components\ParPointInCurve.cs" />
     <Compile Include="ErrorChecker.cs" />
+    <Compile Include="FullImpalaComponent.cs" />
     <Compile Include="Generated.cs" />
     <Compile Include="Generic.cs" />
     <Compile Include="ImpalaComponent.cs" />
     <Compile Include="ImpalaInfo.cs" />
+    <Compile Include="ImpalaParam.cs" />
     <Compile Include="ImpalaTest.cs" />
     <Compile Include="Components\ParDivideLength.cs" />
     <Compile Include="Components\ParMeshCP.cs" />

@@ -483,61 +483,61 @@ namespace Impala
   // 
   // All of this comes in because we want to change the fundamental data structure backing behind the param. 
   // So off we go.
-  abstract class ImpalaParam<T> : GH_ActiveObject, IGH_Param, IGH_ParamWithPostProcess where T : class, IGH_Goo
-  {
-    protected ImpalaParam(IGH_InstanceDescription Tag) : base(Tag)
-    {
-    }
+  //abstract class ImpalaParam<T> : GH_ActiveObject, IGH_Param, IGH_ParamWithPostProcess where T : class, IGH_Goo
+  //{
+  //  protected ImpalaParam(IGH_InstanceDescription Tag) : base(Tag)
+  //  {
+  //  }
 
-    protected ImpalaParam(string sName, string sAbbreviation, string sDescription, string sCategory, string sSubCategory) : base(sName, sAbbreviation, sDescription, sCategory, sSubCategory)
-    {
-    }
+  //  protected ImpalaParam(string sName, string sAbbreviation, string sDescription, string sCategory, string sSubCategory) : base(sName, sAbbreviation, sDescription, sCategory, sSubCategory)
+  //  {
+  //  }
 
-    public abstract GH_ParamKind Kind { get; }
-    public abstract GH_ParamData DataType { get; }
-    public abstract Type Type { get; }
-    public abstract string TypeName { get; }
-    public abstract GH_StateTagList StateTags { get; }
-    public abstract GH_ParamWireDisplay WireDisplay { get; set; }
-    public abstract bool Optional { get; set; }
-    public abstract GH_DataMapping DataMapping { get; set; }
-    public abstract GH_ParamAccess Access { get; set; }
-    public abstract bool Reverse { get; set; }
-    public abstract bool Simplify { get; set; }
+  //  public abstract GH_ParamKind Kind { get; }
+  //  public abstract GH_ParamData DataType { get; }
+  //  public abstract Type Type { get; }
+  //  public abstract string TypeName { get; }
+  //  public abstract GH_StateTagList StateTags { get; }
+  //  public abstract GH_ParamWireDisplay WireDisplay { get; set; }
+  //  public abstract bool Optional { get; set; }
+  //  public abstract GH_DataMapping DataMapping { get; set; }
+  //  public abstract GH_ParamAccess Access { get; set; }
+  //  public abstract bool Reverse { get; set; }
+  //  public abstract bool Simplify { get; set; }
 
 
-    public abstract IList<IGH_Param> Sources { get; }
-    public abstract int SourceCount { get; }
-    public abstract bool HasProxySources { get; }
-    public abstract int ProxySourceCount { get; }
-    public abstract IList<IGH_Param> Recipients { get; }
-    public abstract int VolatileDataCount { get; }
-    public abstract IGH_Structure VolatileData { get; }
+  //  public abstract IList<IGH_Param> Sources { get; }
+  //  public abstract int SourceCount { get; }
+  //  public abstract bool HasProxySources { get; }
+  //  public abstract int ProxySourceCount { get; }
+  //  public abstract IList<IGH_Param> Recipients { get; }
+  //  public abstract int VolatileDataCount { get; }
+  //  public abstract IGH_Structure VolatileData { get; }
 
-    public abstract void AddSource(IGH_Param source);
-    public abstract void AddSource(IGH_Param source, int index);
+  //  public abstract void AddSource(IGH_Param source);
+  //  public abstract void AddSource(IGH_Param source, int index);
 
-    public bool AddVolatileData(GH_Path path, int index, object data) { return false; } // Just don't do it
-    public bool AddVolatileDataList(GH_Path path, IEnumerable list)   { return false; } // Or this either 
-    public bool AddVolatileDataTree(IGH_Structure tree)               { return false; } // Or, really, this.
+  //  public bool AddVolatileData(GH_Path path, int index, object data) { return false; } // Just don't do it
+  //  public bool AddVolatileDataList(GH_Path path, IEnumerable list)   { return false; } // Or this either 
+  //  public bool AddVolatileDataTree(IGH_Structure tree)               { return false; } // Or, really, this.
 
-    public abstract void ClearProxySources(); 
-    public abstract void CreateProxySources();
-    public abstract bool RelinkProxySources(GH_Document document);
-    public abstract void RemoveAllSources();
-    public abstract void RemoveEffects();
-    public abstract void RemoveSource(IGH_Param source);
-    public abstract void RemoveSource(Guid source_id);
-    public abstract void ReplaceSource(IGH_Param old_source, IGH_Param new_source);
-    public abstract void ReplaceSource(Guid old_source_id, IGH_Param new_source);
+  //  public abstract void ClearProxySources(); 
+  //  public abstract void CreateProxySources();
+  //  public abstract bool RelinkProxySources(GH_Document document);
+  //  public abstract void RemoveAllSources();
+  //  public abstract void RemoveEffects();
+  //  public abstract void RemoveSource(IGH_Param source);
+  //  public abstract void RemoveSource(Guid source_id);
+  //  public abstract void ReplaceSource(IGH_Param old_source, IGH_Param new_source);
+  //  public abstract void ReplaceSource(Guid old_source_id, IGH_Param new_source);
 
-    public void PostProcessData()
-    {
-      // Flatten, Graft, Yadda Yadda
-    }
+  //  public void PostProcessData()
+  //  {
+  //    // Flatten, Graft, Yadda Yadda
+  //  }
 
-    public bool SetTree(ImpalaStructure<T> tree) { return false; }
-  }
+
+  //}
 
 
   class ImpalaStructureTester : ImpalaSubComponent
