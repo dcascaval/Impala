@@ -93,6 +93,7 @@
     <Compile Include="ImpalaComponent.cs" />
     <Compile Include="ImpalaInfo.cs" />
     <Compile Include="ImpalaParam.cs" />
+    <Compile Include="ImpalaStructure.cs" />
     <Compile Include="ImpalaTest.cs" />
     <Compile Include="Components\ParDivideLength.cs" />
     <Compile Include="Components\ParMeshCP.cs" />

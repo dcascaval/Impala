@@ -79,6 +79,11 @@ namespace Impala
             return new Point3d(array[0], array[1], array[2]);
         }
 
+        public static IEnumerable<int> UpTo(int i)
+        {
+            return Enumerable.Range(0, i);
+        }
+
         #region PathTools
         /// <summary>
         /// Creates the list of target paths for the looping logic. 
